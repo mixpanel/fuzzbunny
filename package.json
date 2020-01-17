@@ -1,0 +1,28 @@
+{
+  "name": "fuzzbunny",
+  "version": "1.0.0",
+  "description": "Fast fuzzy string matching with scoring and matched segments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mixpanel/fuzzbunny.git"
+  },
+  "keywords": [
+    "fuzzy",
+    "string",
+    "match",
+    "scoring",
+    "segments",
+    "highlight",
+    "bunny"
+  ],
+  "author": "Mixpanel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mixpanel/fuzzbunny/issues"
+  },
+  "homepage": "https://github.com/mixpanel/fuzzbunny#readme"
+}
