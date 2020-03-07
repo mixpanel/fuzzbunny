@@ -33,6 +33,8 @@ TODO some docs
 
 ## Perf numbers
 
+- See perf-tester.js Fuzzbunny matches ~ million sentences / second
+
 # TODO:
 
 eslint + typescript

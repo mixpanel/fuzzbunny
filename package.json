@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Fast fuzzy string matching with scoring and matched segments",
   "main": "lib/fuzzbunny.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "mocha tests/*.js"
   },
