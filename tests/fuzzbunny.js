@@ -1,55 +1,57 @@
+const {deepStrictEqual} = require(`assert`);
+const {stringFilterMatches} = require(`../lib/fuzzbunny`);
 
 describe(`stringFilterMatches`, function() {
   it(`matches at the beginning of a string`, function() {
-    expect(stringFilterMatches(`abcdefg`, `abc`).slice()).to.eql([`abc`, `defg`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `abc`), [`abc`, `defg`]);
   });
 
   it(`matches in the middle/end of a string`, function() {
-    expect(stringFilterMatches(`abcdefg`, `def`).slice()).to.eql([``, `abc`, `def`, `g`]);
-    expect(stringFilterMatches(`abcdefg`, `efg`).slice()).to.eql([``, `abcd`, `efg`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `def`), [``, `abc`, `def`, `g`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `efg`), [``, `abcd`, `efg`]);
   });
 
   it(`returns null for non-matches`, function() {
-    expect(stringFilterMatches(`abcdefg`, `zx`)).to.eql(null);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `zx`), null);
   });
 
   it(`matches prefix filter characters (fuzzy)`, function() {
-    expect(stringFilterMatches(`ab cdefg`, `ac`).slice()).to.eql([`a`, `b `, `c`, `defg`]);
+    deepStrictEqual(stringFilterMatches(`ab cdefg`, `ac`), [`a`, `b `, `c`, `defg`]);
   });
 
   it(`is case-insensitive`, function() {
-    expect(stringFilterMatches(`abcdefg`, `dEf`).slice()).to.eql([``, `abc`, `def`, `g`]);
-    expect(stringFilterMatches(`abCDEfg`, `dEF`).slice()).to.eql([``, `abC`, `DEf`, `g`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `dEf`), [``, `abc`, `def`, `g`]);
+    deepStrictEqual(stringFilterMatches(`abCDEfg`, `dEF`), [``, `abC`, `DEf`, `g`]);
   });
 
   it(`ignores whitespace padding`, function() {
-    expect(stringFilterMatches(`abcdefg`, `   def`).slice()).to.eql([``, `abc`, `def`, `g`]);
-    expect(stringFilterMatches(`abcdefg`, `abc   `).slice()).to.eql([`abc`, `defg`]);
-    expect(stringFilterMatches(`abcdefg`, `  abc `).slice()).to.eql([`abc`, `defg`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `   def`), [``, `abc`, `def`, `g`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `abc   `), [`abc`, `defg`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `  abc `), [`abc`, `defg`]);
   });
 
   it(`matches when one search term is a substring of another`, function() {
-    expect(stringFilterMatches(`This is a test`, `this is`).slice()).to.eql([`This is`, ` a test`]);
-    expect(stringFilterMatches(`This should not match`, `this is`)).to.eql(null);
+    deepStrictEqual(stringFilterMatches(`This is a test`, `this is`), [`This is`, ` a test`]);
+    deepStrictEqual(stringFilterMatches(`This should not match`, `this is`), null);
   });
 
   it(`matches when no filter string is passed`, function() {
-    expect(stringFilterMatches(`abcdefg`, ``)).to.eql([``, `abcdefg`]);
-    expect(stringFilterMatches(`abcdefg`, null)).to.eql([``, `abcdefg`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, ``), [``, `abcdefg`]);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, null), [``, `abcdefg`]);
   });
 
   it(`merges contiguous matches`, function() {
-    expect(stringFilterMatches(`abcd efg`, `bcd efg`).slice()).to.eql([``, `a`, `bcd efg`]);
+    deepStrictEqual(stringFilterMatches(`abcd efg`, `bcd efg`), [``, `a`, `bcd efg`]);
   });
 
   it(`does not match when one or more space-separated terms do not match`, function() {
-    expect(stringFilterMatches(`abcdefg`, `abc xxx`)).to.eql(null);
+    deepStrictEqual(stringFilterMatches(`abcdefg`, `abc xxx`), null);
   });
 
   it(`matches only substrings when filter string is quoted`, function() {
-    expect(stringFilterMatches(`a b c abC def`, `"abc d"`)).to.eql([``, `a b c `, `abC d`, `ef`]);
-    expect(stringFilterMatches(`a bc def`, `"abc d"`)).to.eql(null);
-    expect(stringFilterMatches(`Las Vegas`, `"la`)).to.eql([`La`, `s Vegas`]);
-    expect(stringFilterMatches(`Los Angeles`, `"LA`)).to.eql(null);
+    deepStrictEqual(stringFilterMatches(`a b c abC def`, `"abc d"`), [``, `a b c `, `abC d`, `ef`]);
+    deepStrictEqual(stringFilterMatches(`a bc def`, `"abc d"`), null);
+    deepStrictEqual(stringFilterMatches(`Las Vegas`, `"la`), [`La`, `s Vegas`]);
+    deepStrictEqual(stringFilterMatches(`Los Angeles`, `"LA`), null);
   });
 });

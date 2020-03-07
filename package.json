@@ -2,9 +2,9 @@
   "name": "fuzzbunny",
   "version": "1.0.0",
   "description": "Fast fuzzy string matching with scoring and matched segments",
-  "main": "index.js",
+  "main": "lib/fuzzbunny.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/mixpanel/fuzzbunny/issues"
   },
-  "homepage": "https://github.com/mixpanel/fuzzbunny#readme"
+  "homepage": "https://github.com/mixpanel/fuzzbunny#readme",
+  "devDependencies": {
+    "eslint": "6.8.0",
+    "mocha": "7.1.0",
+    "prettier": "1.19.1",
+    "typescript": "3.8.3"
+  }
 }
