@@ -5,15 +5,31 @@ declare module "fuzzbunny" {
         highlights: { [K in keyof Item]?: string[] | undefined; };
     };
     /**
+     * @template Item
+     * @typedef {{item: Item, score: number, highlights: {[K in keyof Item]?: string[]}}} FuzzyFilterResult
+     */
+    /**
+     * Searches an array of items on props and returns filtered + sorted array with scores and highlights
+     * @template Item
+     * @param {Item[]} items
+     * @param {(keyof Item)[]} props
+     * @param {string} searchStr
+     * @returns {FuzzyFilterResult<Item>[]}
+     */
+    export function fuzzyFilter<Item>(items: Item[], props: (keyof Item)[], searchStr: string): {
+        item: Item;
+        score: number;
+        highlights: { [K in keyof Item]?: string[] | undefined; };
+    }[];
+    /**
      * Fuzzy match and return the score, highlights, and lowercased matchStr (for sort)
      * @param {string} targetStr - target to search on / haystack string
      * @param {string} searchStr - search filter / needle string
-     * @returns {{score: number, highlights: string[], matchStr: string} | null} - null if no match
+     * @returns {{score: number, highlights: string[]} | null} - null if no match
      */
     export function fuzzyMatch(targetStr: string, searchStr: string): {
         score: number;
         highlights: string[];
-        matchStr: string;
     } | null;
     /**
      * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
@@ -35,21 +51,4 @@ declare module "fuzzbunny" {
      * @returns {string[]} - ['no match', 'match', 'no match', 'match']
      */
     export function highlightsFromRanges(targetStr: string, ranges: number[]): string[];
-    /**
-     * @template Item
-     * @typedef {{item: Item, score: number, highlights: {[K in keyof Item]?: string[]}}} FuzzyFilterResult
-     */
-    /**
-     * Searches an array of items on props and returns filtered + sorted array with scores and highlights
-     * @template Item
-     * @param {Item[]} items
-     * @param {string} searchStr
-     * @param {(keyof Item)[]} props
-     * @returns {FuzzyFilterResult<Item>[]}
-     */
-    export function fuzzyFilterItems<Item>(items: Item[], searchStr: string, props: (keyof Item)[]): {
-        item: Item;
-        score: number;
-        highlights: { [K in keyof Item]?: string[] | undefined; };
-    }[];
 }

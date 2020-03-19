@@ -141,10 +141,10 @@
         }
 
         fuzzyFilterArticles(articles, searchFilter) {
-          const {fuzzyFilterItems} = module.exports; // from fuzzbunny
+          const {fuzzyFilter} = module.exports; // from fuzzbunny
           // only sort if more than 2 characters, sor is expensive for 1000s of items
           searchFilter = searchFilter.length > 2 ? searchFilter : ``;
-          return fuzzyFilterItems(articles, [`name`], searchFilter);
+          return fuzzyFilter(articles, [`name`], searchFilter);
         }
 
         render() {

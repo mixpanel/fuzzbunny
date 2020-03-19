@@ -302,7 +302,7 @@ function fuzzyMatch(targetStr, searchStr) {
  * @param {string} searchStr
  * @returns {FuzzyFilterResult<Item>[]}
  */
-function fuzzyFilterItems(items, props, searchStr) {
+function fuzzyFilter(items, props, searchStr) {
   /** @type {FuzzyFilterResult<Item>[]} */
   const results = [];
   const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();
@@ -346,4 +346,4 @@ function fuzzyFilterItems(items, props, searchStr) {
   return results;
 }
 
-module.exports = {fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges, fuzzyFilterItems};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges};

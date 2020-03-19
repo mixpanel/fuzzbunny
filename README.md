@@ -20,8 +20,8 @@ FuzzBunny is a small (1k) fast & memory efficient fuzzy string searching/matchin
 ## Usage
 
 ```js
-const {fuzzyMatch, fuzzyFilterItems} = require(`fuzzbunny`);
-// or import {fuzzyMatch, fuzzyFilterItems} from 'fuzzbunny';
+const {fuzzyFilter, fuzzyMatch} = require(`fuzzbunny`);
+// or import {fuzzyFilter, fuzzyMatch} from 'fuzzbunny';
 
 const heroes = [
   {
@@ -42,8 +42,8 @@ const heroes = [
   },
 ];
 
-// Use fuzzyFilterItems to filter an array of items and get filtered + score sorted results with highlights.
-const results = fuzzyFilterItems(heroes, [`name`, `ability`], `stm`);
+// Use fuzzyFilter to filter an array of items and get filtered + score sorted results with highlights.
+const results = fuzzyFilter(heroes, [`name`, `ability`], `stm`);
 /*
 results = [
   {

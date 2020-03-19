@@ -6,7 +6,7 @@ function getHighlights(targetStr, searchStr) {
   return match && match.highlights;
 }
 
-describe(`stringFilterMatches`, function() {
+describe(`fuzzyMatch`, function() {
   it(`matches at the beginning of a string`, function() {
     assert.deepStrictEqual(getHighlights(`abcdefg`, `abc`), [``, `abc`, `defg`]);
   });
