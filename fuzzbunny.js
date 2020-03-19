@@ -271,7 +271,7 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
  * Fuzzy match and return the score, highlights, and lowercased matchStr (for sort)
  * @param {string} targetStr - target to search on / haystack string
  * @param {string} searchStr - search filter / needle string
- * @returns {{score: number, highlights: string[], matchStr: string} | null} - null if no match
+ * @returns {{score: number, highlights: string[]} | null} - null if no match
  */
 function fuzzyMatch(targetStr, searchStr) {
   targetStr = targetStr || ``;
@@ -283,7 +283,6 @@ function fuzzyMatch(targetStr, searchStr) {
     return {
       score: match.score,
       highlights: highlightsFromRanges(targetStr, match.ranges),
-      matchStr: targetSanitizedStr,
     };
   }
 
@@ -299,11 +298,11 @@ function fuzzyMatch(targetStr, searchStr) {
  * Searches an array of items on props and returns filtered + sorted array with scores and highlights
  * @template Item
  * @param {Item[]} items
- * @param {string} searchStr
  * @param {(keyof Item)[]} props
+ * @param {string} searchStr
  * @returns {FuzzyFilterResult<Item>[]}
  */
-function fuzzyFilterItems(items, searchStr, props) {
+function fuzzyFilterItems(items, props, searchStr) {
   /** @type {FuzzyFilterResult<Item>[]} */
   const results = [];
   const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();

@@ -144,7 +144,7 @@
           const {fuzzyFilterItems} = module.exports; // from fuzzbunny
           // only sort if more than 2 characters, sor is expensive for 1000s of items
           searchFilter = searchFilter.length > 2 ? searchFilter : ``;
-          return fuzzyFilterItems(articles, searchFilter, [`name`]);
+          return fuzzyFilterItems(articles, [`name`], searchFilter);
         }
 
         render() {
