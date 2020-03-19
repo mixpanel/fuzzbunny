@@ -97,7 +97,7 @@ function _getTargetSkips(targetStr) {
   }
 
   // We push the length as the last skip so when matching
-  // every segment aligns between skip[i] and skip[i + 1]
+  // every range aligns between skip[i] and skip[i + 1]
   // and we don't have to do extraneous overflow checks
   targetSkips.push(targetStr.length);
 
@@ -112,14 +112,14 @@ function _getTargetSkips(targetStr) {
  * @param {string} targetStr - lowercased target string
  * @param {number[]} targetSkips - skip boundary indices
  * @returns {number[] | null}
- *  - the [idx, len, ...] segments where the match occured
+ *  - the [idx, len, ...] ranges where the match occured
  *  - null if no match found
  */
 function _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips) {
   let searchIdx = 0;
   const searchLen = searchStr.length;
   /** @type {number[]} */
-  const segments = [];
+  const ranges = [];
 
   for (let skipLen = targetSkips.length - 1; skipIdx < skipLen; ++skipIdx) {
     const startIdx = targetSkips[skipIdx];
@@ -152,18 +152,18 @@ function _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips) {
     }
 
     if (matchLen) {
-      // make contiguous segments if possible
-      const segLen = segments.length;
-      if (segLen >= 2 && segments[segLen - 2] + segments[segLen - 1] === startIdx) {
-        segments[segLen - 1] += matchLen;
+      // make contiguous ranges if possible
+      const rangesLen = ranges.length;
+      if (rangesLen >= 2 && ranges[rangesLen - 2] + ranges[rangesLen - 1] === startIdx) {
+        ranges[rangesLen - 1] += matchLen;
       } else {
-        segments.push(startIdx, matchLen);
+        ranges.push(startIdx, matchLen);
       }
     }
 
     if (searchIdx === searchLen) {
-      // search is fully matched, return segments
-      return segments;
+      // search is fully matched, return ranges
+      return ranges;
     }
   }
 
@@ -171,20 +171,20 @@ function _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips) {
 }
 
 /**
- * Returns the string parts for highlighting from the matched segments
+ * Returns the string parts for highlighting from the matched ranges
  * @example ('my example', [3, 2]) would return ['my ', 'ex', 'ample']
  * @param {string} targetStr - the string that was matched
- * @param {number[]} segments - [idx1, len1, idx2, len2] matched segments
+ * @param {number[]} ranges - [idx1, len1, idx2, len2] matched ranges
  * @returns {string[]} - ['no match', 'match', 'no match', 'match']
  */
-function matchPartsFromSegments(targetStr, segments) {
+function matchPartsFromRanges(targetStr, ranges) {
   const matchParts = [];
   let lastIndex = 0;
-  let segmentsIdx = 0;
+  let rangesIdx = 0;
 
-  for (; segmentsIdx < segments.length; segmentsIdx += 2) {
-    const startIndex = segments[segmentsIdx];
-    const endIndex = startIndex + segments[segmentsIdx + 1];
+  for (; rangesIdx < ranges.length; rangesIdx += 2) {
+    const startIndex = ranges[rangesIdx];
+    const endIndex = startIndex + ranges[rangesIdx + 1];
     matchParts.push(targetStr.slice(lastIndex, startIndex));
     matchParts.push(targetStr.slice(startIndex, endIndex));
     lastIndex = endIndex;
@@ -200,10 +200,10 @@ function matchPartsFromSegments(targetStr, segments) {
 /**
  * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
  * If perf is of importance and you want to avoid lowercase + trim + highlighting on every item
- * Use this and only call matchPartsFromSegments for only the items that are displayed
+ * Use this and only call matchPartsFromRanges for only the items that are displayed
  * @param {string} targetStr - lowercased trimmed target string to search on
  * @param {string} searchStr - lowercased trimmed search string
- * @returns {{score: number, segments: number[]} | null} - null if no match
+ * @returns {{score: number, ranges: number[]} | null} - null if no match
  */
 function fuzzyMatchSanitized(targetStr, searchStr) {
   if (!targetStr) {
@@ -214,7 +214,7 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   if (!searchStr) {
     return {
       score: 0,
-      segments: [],
+      ranges: [],
     };
   }
 
@@ -235,7 +235,7 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
     const isWordPrefix = matchIdx > 0 && !_isCodeAlphaNum(targetStr.charCodeAt(matchIdx - 1));
     return {
       score: _getMatchScore(matchIdx, searchLen, isWordPrefix),
-      segments: [matchIdx, searchLen],
+      ranges: [matchIdx, searchLen],
     };
   }
 
@@ -253,13 +253,13 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   for (let skipIdx = 0, skipLen = targetSkips.length - 1; skipIdx < skipLen; ++skipIdx) {
     if (targetStr[targetSkips[skipIdx]] === searchStr[0]) {
       // possible alignment, perform prefix match
-      const segments = _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips);
-      if (segments) {
+      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips);
+      if (ranges) {
         let score = 0;
-        for (let i = 0, len = segments.length; i < len; i += 2) {
-          score += _getMatchScore(segments[i], segments[i + 1], true /*isWordPrefix*/);
+        for (let i = 0, len = ranges.length; i < len; i += 2) {
+          score += _getMatchScore(ranges[i], ranges[i + 1], true /*isWordPrefix*/);
         }
-        return {score, segments};
+        return {score, ranges};
       }
     }
   }
@@ -282,7 +282,7 @@ function fuzzyMatch(targetStr, searchStr) {
   if (match) {
     return {
       score: match.score,
-      matchParts: matchPartsFromSegments(targetStr, match.segments),
+      matchParts: matchPartsFromRanges(targetStr, match.ranges),
       matchStr: targetSanitizedStr,
     };
   }
@@ -290,4 +290,12 @@ function fuzzyMatch(targetStr, searchStr) {
   return null;
 }
 
-module.exports = {fuzzyMatch, fuzzyMatchSanitized, matchPartsFromSegments};
+/**
+ * @template T
+ * @param {T[]} objects
+ * @param {*} props
+ * @param {string} searchStr
+ */
+function fuzzyFilter(objects, props, searchStr) {}
+
+module.exports = {fuzzyMatch, fuzzyMatchSanitized, matchPartsFromRanges};

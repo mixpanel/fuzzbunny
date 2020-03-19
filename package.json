@@ -1,7 +1,7 @@
 {
   "name": "fuzzbunny",
   "version": "1.0.0",
-  "description": "Fast fuzzy string matching with scoring and matched segments",
+  "description": "Fast fuzzy string matching with scoring and matched ranges",
   "main": "fuzzbunny.js",
   "types": "fuzzbunny.d.ts",
   "files": [
@@ -22,7 +22,7 @@
     "string",
     "match",
     "scoring",
-    "segments",
+    "ranges",
     "highlight",
     "bunny"
   ],
