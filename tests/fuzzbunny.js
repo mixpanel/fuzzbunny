@@ -1,5 +1,5 @@
 const assert = require(`assert`);
-const {stringFilterMatches} = require(`../lib/fuzzbunny`);
+const {stringFilterMatches} = require(`..`);
 
 describe(`stringFilterMatches`, function() {
   it(`matches at the beginning of a string`, function() {

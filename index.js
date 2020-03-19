@@ -1,5 +1,3 @@
-// @ts-check
-
 const SCORE_START_STR = 1000;
 const SCORE_PREFIX = 200;
 const SCORE_CONTIGUOUS = 300;
@@ -113,11 +111,14 @@ function _getTargetSkips(targetStr) {
  * @param {string} searchStr - lowercased search string
  * @param {string} targetStr - lowercased target string
  * @param {number[]} targetSkips - skip boundary indices
- * @returns {number[]} - the [idx, len, ...] segments where the match occured
+ * @returns {number[] | null}
+ *  - the [idx, len, ...] segments where the match occured
+ *  - null if no match found
  */
 function _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips) {
   let searchIdx = 0;
   const searchLen = searchStr.length;
+  /** @type {number[]} */
   const segments = [];
 
   for (let skipLen = targetSkips.length - 1; skipIdx < skipLen; ++skipIdx) {
@@ -295,7 +296,7 @@ function fuzzyMatch(targetStr, searchStr) {
  * bars).
  * @param {string} targetStr - string to match on (haystack)
  * @param {string} searchStr - search filter string (needle)
- * @returns {string[]} list of alternating matching and non-matching substrings
+ * @returns {string[] | null} list of alternating matching and non-matching substrings
  * in order of the original string; even = match, odd = no match
  * @example
  * stringFilterMatches(`my example string`, `myexstr`);

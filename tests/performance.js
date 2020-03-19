@@ -1,6 +1,6 @@
 const fs = require(`fs`);
 const assert = require(`assert`);
-const {fuzzyMatchSanitized} = require('../lib/fuzzbunny');
+const {fuzzyMatchSanitized} = require('..');
 
 const lines = fs
   .readFileSync(`${__dirname}/fixtures/gutenberg-catalog.txt`, 'utf-8')

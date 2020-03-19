@@ -2,7 +2,8 @@
   "name": "fuzzbunny",
   "version": "1.0.0",
   "description": "Fast fuzzy string matching with scoring and matched segments",
-  "main": "lib/fuzzbunny.js",
+  "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "lib"
   ],
