@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FuzzBunny Demo</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+
+    <style type="text/css">
+      body {
+        color: #444;
+        font-family: Helvetica, sans-serif;
+        font-size: 14px;
+        margin: 0px;
+        padding: 0px;
+      }
+
+      a {
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .catalog {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 30px auto;
+        padding: 10px;
+        width: 500px;
+      }
+
+      .title {
+        font-size: 16px;
+        margin: 0 0 5px 0;
+        padding: 5px;
+      }
+
+      .search {
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        color: inherit;
+        font-size: inherit;
+        height: 35px;
+        margin-bottom: 5px;
+        padding: 5px 10px;
+        width: 100%;
+      }
+
+      .stats {
+        color: #aaa;
+        padding: 5px;
+      }
+
+      .results {
+        height: calc(100vh - 185px);
+        overflow: auto;
+      }
+
+      .results a {
+        color: inherit;
+        display: block;
+        padding: 5px;
+      }
+      .results a:hover {
+        background-color: #eee;
+      }
+
+      .results span:nth-child(even) {
+        font-weight: bold;
+      }
+    </style>
+
+    <script type="text/javascript">
+      const module = {}; // dummy object for loading fuzz commonjs module
+      const catalogUrl = `/tests/fixtures/gutenberg-catalog.txt`;
+      const storageKey = `gutenberg-catalog`;
+      const numInitialItemsToShow = 50;
+
+      function getArticleUrl(id) {
+        return `https://www.gutenberg.org/ebooks/${id}`;
+      }
+
+      async function fetchArticles() {
+        let catalog = localStorage.getItem(storageKey);
+        if (!catalog) {
+          catalog = await (await fetch(catalogUrl)).text();
+          localStorage.setItem(storageKey, catalog);
+        }
+
+        return catalog
+          .trim()
+          .split(`\n`)
+          .slice(1) // ignore comment
+          .reverse()
+          .map((line) => {
+            // parse article's name and id into object
+            const [_, name, id] = line.match(/^(.*?)\s+(\d+)$/);
+            return {name, id};
+          });
+      }
+
+      class ArticleListComponent {
+        constructor(articles, elRefs) {
+          this.state = {
+            articles,
+            numItemsToShow: numInitialItemsToShow,
+            searchFilter: ``,
+          };
+          this.elRefs = elRefs;
+          this.elRefs.search.addEventListener(`input`, this.handleSearchInput.bind(this));
+          this.elRefs.results.addEventListener(`scroll`, this.handleResultsScroll.bind(this));
+          this.update({});
+        }
+
+        // Simple update -> render lifecycle;
+        update(props = {}) {
+          Object.assign(this.state, props);
+          this.render();
+        }
+
+        handleSearchInput(ev) {
+          this.elRefs.results.scrollTop = 0;
+          this.update({
+            searchFilter: ev.currentTarget.value,
+            numItemsToShow: numInitialItemsToShow,
+          });
+        }
+
+        handleResultsScroll(ev) {
+          const {articles, numItemsToShow} = this.state;
+          const resultsEl = this.elRefs.results;
+          const distanceToBottom = resultsEl.scrollHeight - resultsEl.clientHeight - resultsEl.scrollTop;
+          const distanceThreshold = 100;
+
+          if (distanceToBottom < distanceThreshold) {
+            this.update({
+              numItemsToShow: Math.min(numItemsToShow + numInitialItemsToShow, articles.length),
+            });
+          }
+        }
+
+        fuzzyFilterArticles(articles, searchFilter) {
+          const {fuzzyFilterItems} = module.exports; // from fuzzbunny
+          // only sort if more than 2 characters, sor is expensive for 1000s of items
+          searchFilter = searchFilter.length > 2 ? searchFilter : ``;
+          return fuzzyFilterItems(articles, searchFilter, [`name`]);
+        }
+
+        render() {
+          const {articles, searchFilter, numItemsToShow} = this.state;
+
+          const startTime = Date.now();
+          const filteredArticles = this.fuzzyFilterArticles(articles, searchFilter);
+          const elapsedMs = Date.now() - startTime;
+
+          console.log(filteredArticles);
+
+          this.elRefs.results.innerHTML = filteredArticles
+            .slice(0, numItemsToShow)
+            .map(
+              (match) =>
+                `<a href='${getArticleUrl(match.item.id)}' target='_blank'>${match.highlights.name
+                  .map((part) => `<span>${part}</span>`)
+                  .join(``)}</a>`,
+            )
+            .join(``);
+
+          this.elRefs.stats.innerHTML = `Found ${filteredArticles.length.toLocaleString()} results in ${elapsedMs}ms`;
+        }
+      }
+
+      document.addEventListener(`DOMContentLoaded`, function() {
+        fetchArticles().then((articles) => {
+          new ArticleListComponent(articles, {
+            search: document.querySelector(`.search`),
+            results: document.querySelector(`.results`),
+            stats: document.querySelector(`.stats`),
+          });
+        });
+      });
+    </script>
+    <script type="text/javascript" src="/fuzzbunny.js"></script>
+  </head>
+  <body>
+    <div class="catalog">
+      <h1 class="title">FuzzBunny <a href="http://www.gutenberg.org/catalog/">Gutenberg Catalog</a> Demo</h1>
+      <input class="search" type="text" placeholder="Search Gutenberg Catalog" />
+      <div class="stats"></div>
+      <div class="results">Loading ...</div>
+    </div>
+  </body>
+</html>

@@ -291,15 +291,60 @@ function fuzzyMatch(targetStr, searchStr) {
 }
 
 /**
- * Searches a list of objects on props and returns filtered + sorted array with scores and highlights
- * @template O
- * @param {O[]} objects
- * @param {(keyof O)[]} props
- * @param {string} searchStr
- * @returns {Array<{obj: O, score: number, highlights: {[K in keyof O]: string[]}}>}
+ * @template Item
+ * @typedef {{item: Item, score: number, highlights: {[K in keyof Item]?: string[]}}} FuzzyFilterResult
  */
-function fuzzyFilter(objects, props, searchStr) {
-  return [];
+
+/**
+ * Searches an array of items on props and returns filtered + sorted array with scores and highlights
+ * @template Item
+ * @param {Item[]} items
+ * @param {string} searchStr
+ * @param {(keyof Item)[]} props
+ * @returns {FuzzyFilterResult<Item>[]}
+ */
+function fuzzyFilterItems(items, searchStr, props) {
+  /** @type {FuzzyFilterResult<Item>[]} */
+  const results = [];
+  const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();
+
+  for (const item of items) {
+    /** @type {FuzzyFilterResult<Item> | null} */
+    let result = null;
+    for (const prop of props) {
+      const value = item[prop];
+      if (typeof value === `string` && value) {
+        const valueStrLowerCased = value.toLowerCase();
+        const match = fuzzyMatchSanitized(valueStrLowerCased, searchStrLowerCased);
+        if (match) {
+          result = result || {item, score: 0, highlights: {}};
+          result.score = Math.max(match.score, result.score);
+          result.highlights[prop] = highlightsFromRanges(value, match.ranges);
+        }
+      }
+    }
+    if (result) {
+      results.push(result);
+    }
+  }
+
+  // sort if searchStr is not empty, otherwise preserve original order, since its a pass through
+  if (searchStrLowerCased) {
+    results.sort((a, b) => {
+      // sort by score, then alphabetically by each prop
+      let diff = b.score - a.score;
+      for (let i = 0, len = props.length; diff === 0 && i < len; ++i) {
+        const prop = props[i];
+        const valA = a.item[prop];
+        const valB = b.item[prop];
+        // @ts-ignore string comparison
+        diff = valA.localeCompare(valB);
+      }
+      return diff;
+    });
+  }
+
+  return results;
 }
 
-module.exports = {fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges};
+module.exports = {fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges, fuzzyFilterItems};
