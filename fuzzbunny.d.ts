@@ -1,4 +1,9 @@
 declare module "fuzzbunny" {
+    export type FuzzyFilterResult<Item> = {
+        item: Item;
+        score: number;
+        highlights: { [K in keyof Item]?: string[] | undefined; };
+    };
     /**
      * Fuzzy match and return the score, highlights, and lowercased matchStr (for sort)
      * @param {string} targetStr - target to search on / haystack string
@@ -30,4 +35,21 @@ declare module "fuzzbunny" {
      * @returns {string[]} - ['no match', 'match', 'no match', 'match']
      */
     export function highlightsFromRanges(targetStr: string, ranges: number[]): string[];
+    /**
+     * @template Item
+     * @typedef {{item: Item, score: number, highlights: {[K in keyof Item]?: string[]}}} FuzzyFilterResult
+     */
+    /**
+     * Searches an array of items on props and returns filtered + sorted array with scores and highlights
+     * @template Item
+     * @param {Item[]} items
+     * @param {string} searchStr
+     * @param {(keyof Item)[]} props
+     * @returns {FuzzyFilterResult<Item>[]}
+     */
+    export function fuzzyFilterItems<Item>(items: Item[], searchStr: string, props: (keyof Item)[]): {
+        item: Item;
+        score: number;
+        highlights: { [K in keyof Item]?: string[] | undefined; };
+    }[];
 }
