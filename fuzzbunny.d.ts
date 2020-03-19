@@ -1,22 +1,9 @@
 declare module "fuzzbunny" {
     /**
-     * Split a string into match and non-match substrings based on finding
-     * all whitespace-separated terms in a given filter string (for UI search
-     * bars).
-     * @param {string} targetStr - string to match on (haystack)
-     * @param {string} searchStr - search filter string (needle)
-     * @returns {string[] | null} list of alternating matching and non-matching substrings
-     * in order of the original string; even = match, odd = no match
-     * @example
-     * stringFilterMatches(`my example string`, `myexstr`);
-     * // [`my`, ` `, `ex`, `ample `, `str`, `ing`]
-     */
-    export function stringFilterMatches(targetStr: string, searchStr: string): string[] | null;
-    /**
      * Fuzzy match and return the score, matchParts, and lowercased matchStr (for sort)
      * @param {string} targetStr - target to search on / haystack string
      * @param {string} searchStr - search filter / needle string
-     * @returns {{score: number, matchParts: string[], matchStr: string} | null}
+     * @returns {{score: number, matchParts: string[], matchStr: string} | null} - null if no match
      */
     export function fuzzyMatch(targetStr: string, searchStr: string): {
         score: number;
@@ -29,7 +16,7 @@ declare module "fuzzbunny" {
      * Use this and only call matchPartsFromSegments for only the items that are displayed
      * @param {string} targetStr - lowercased trimmed target string to search on
      * @param {string} searchStr - lowercased trimmed search string
-     * @returns {{score: number, segments: number[]} | null}
+     * @returns {{score: number, segments: number[]} | null} - null if no match
      */
     export function fuzzyMatchSanitized(targetStr: string, searchStr: string): {
         score: number;
