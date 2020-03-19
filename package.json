@@ -2,11 +2,11 @@
   "name": "fuzzbunny",
   "version": "1.0.0",
   "description": "Fast fuzzy string matching with scoring and matched segments",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "fuzzbunny.js",
+  "types": "fuzzbunny.d.ts",
   "files": [
-    "index.js",
-    "index.d.ts"
+    "fuzzbunny.js",
+    "fuzzbunny.d.ts"
   ],
   "scripts": {
     "test": "mocha tests/*.js",

@@ -7,11 +7,11 @@
     "checkJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outFile": "./index.d.ts",
+    "outFile": "fuzzbunny.d.ts",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "files": ["./index.js"]
+  "files": ["fuzzbunny.js"]
 }

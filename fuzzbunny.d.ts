@@ -1,4 +1,4 @@
-declare module "index" {
+declare module "fuzzbunny" {
     /**
      * Split a string into match and non-match substrings based on finding
      * all whitespace-separated terms in a given filter string (for UI search
