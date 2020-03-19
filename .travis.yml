@@ -4,8 +4,8 @@ node_js:
   - '12'
 before_script:
   - npm run lint
-  - npm run type-check
-script:
-  - npm run test
+  script:
+    - npm run test
+    - npm run gen-types
 branches:
   only: master

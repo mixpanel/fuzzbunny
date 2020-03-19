@@ -177,30 +177,30 @@ function _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips) {
  * @param {number[]} ranges - [idx1, len1, idx2, len2] matched ranges
  * @returns {string[]} - ['no match', 'match', 'no match', 'match']
  */
-function matchPartsFromRanges(targetStr, ranges) {
-  const matchParts = [];
+function highlightsFromRanges(targetStr, ranges) {
+  const highlights = [];
   let lastIndex = 0;
   let rangesIdx = 0;
 
   for (; rangesIdx < ranges.length; rangesIdx += 2) {
     const startIndex = ranges[rangesIdx];
     const endIndex = startIndex + ranges[rangesIdx + 1];
-    matchParts.push(targetStr.slice(lastIndex, startIndex));
-    matchParts.push(targetStr.slice(startIndex, endIndex));
+    highlights.push(targetStr.slice(lastIndex, startIndex));
+    highlights.push(targetStr.slice(startIndex, endIndex));
     lastIndex = endIndex;
   }
 
   if (lastIndex < targetStr.length) {
-    matchParts.push(targetStr.slice(lastIndex));
+    highlights.push(targetStr.slice(lastIndex));
   }
 
-  return matchParts;
+  return highlights;
 }
 
 /**
  * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
  * If perf is of importance and you want to avoid lowercase + trim + highlighting on every item
- * Use this and only call matchPartsFromRanges for only the items that are displayed
+ * Use this and only call highlightsFromRanges for only the items that are displayed
  * @param {string} targetStr - lowercased trimmed target string to search on
  * @param {string} searchStr - lowercased trimmed search string
  * @returns {{score: number, ranges: number[]} | null} - null if no match
@@ -268,10 +268,10 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
 }
 
 /**
- * Fuzzy match and return the score, matchParts, and lowercased matchStr (for sort)
+ * Fuzzy match and return the score, highlights, and lowercased matchStr (for sort)
  * @param {string} targetStr - target to search on / haystack string
  * @param {string} searchStr - search filter / needle string
- * @returns {{score: number, matchParts: string[], matchStr: string} | null} - null if no match
+ * @returns {{score: number, highlights: string[], matchStr: string} | null} - null if no match
  */
 function fuzzyMatch(targetStr, searchStr) {
   targetStr = targetStr || ``;
@@ -282,7 +282,7 @@ function fuzzyMatch(targetStr, searchStr) {
   if (match) {
     return {
       score: match.score,
-      matchParts: matchPartsFromRanges(targetStr, match.ranges),
+      highlights: highlightsFromRanges(targetStr, match.ranges),
       matchStr: targetSanitizedStr,
     };
   }
@@ -291,11 +291,15 @@ function fuzzyMatch(targetStr, searchStr) {
 }
 
 /**
- * @template T
- * @param {T[]} objects
- * @param {*} props
+ * Searches a list of objects on props and returns filtered + sorted array with scores and highlights
+ * @template O
+ * @param {O[]} objects
+ * @param {(keyof O)[]} props
  * @param {string} searchStr
+ * @returns {Array<{obj: O, score: number, highlights: {[K in keyof O]: string[]}}>}
  */
-function fuzzyFilter(objects, props, searchStr) {}
+function fuzzyFilter(objects, props, searchStr) {
+  return [];
+}
 
-module.exports = {fuzzyMatch, fuzzyMatchSanitized, matchPartsFromRanges};
+module.exports = {fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges};

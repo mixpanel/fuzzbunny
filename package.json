@@ -11,7 +11,7 @@
   "scripts": {
     "test": "mocha tests/*.js",
     "lint": "prettier --list-different {./*.js,tests/**.js}",
-    "type-check": "tsc"
+    "gen-types": "tsc"
   },
   "repository": {
     "type": "git",
