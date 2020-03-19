@@ -5,7 +5,8 @@ const {fuzzyMatchSanitized} = require('../lib/fuzzbunny');
 const lines = fs
   .readFileSync(`${__dirname}/fixtures/gutenberg-catalog.txt`, 'utf-8')
   .trim()
-  .split(`\n`);
+  .split(`\n`)
+  .slice(1); // ignore attribution comment on first line
 
 context(`performance`, function() {
   describe(`fuzzyMatchSanitized`, function() {
