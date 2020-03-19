@@ -5,11 +5,13 @@
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
-    "lib"
+    "index.js",
+    "index.d.ts"
   ],
   "scripts": {
     "test": "mocha tests/*.js",
-    "lint": "prettier --list-different {./*.js,tests/**.js} && tsc"
+    "lint": "prettier --list-different {./*.js,tests/**.js}",
+    "type-check": "tsc"
   },
   "repository": {
     "type": "git",

@@ -33,9 +33,4 @@ TODO some docs
 
 ## Perf numbers
 
-- See perf-tester.js Fuzzbunny matches ~ million sentences / second
-
-# TODO:
-
-eslint + typescript
-travis build
+- See tests/performance.js Fuzzbunny matches ~ million lines / second
