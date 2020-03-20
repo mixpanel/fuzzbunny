@@ -92,6 +92,10 @@ Example from demo:
 
 ![image](https://user-images.githubusercontent.com/1018196/77127584-58305080-6a0a-11ea-9fee-d8eaf28744b8.png)
 
+**NOTE**: `fuzzbunny` optmizes for meaningful results. It only does substring and prefix(acronym) matching. It doesn't do greedy matching.
+
+This is because humans brains are great at prefix recalling. E.g words that start with "ca" are much easier to recall than words that contain the letters "c" and "a" somewhere. It's easy to remember that `{usa}` stands for `{U}nited {S}tates of {A}merica`, not `F{u}ll Java{s}cript Fr{a}mework`
+
 ## Performance
 
 Fuzzbunny matches ~ million lines/second. See [tests/performance.js](tests/performance.js)
