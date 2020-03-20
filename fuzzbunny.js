@@ -307,6 +307,10 @@ function fuzzyFilter(items, props, searchStr) {
   const results = [];
   const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();
 
+  if (!Array.isArray(props) || props.length == 0) {
+    throw new Error(`empty props, did you forget to pass props?`);
+  }
+
   for (const item of items) {
     /** @type {FuzzyFilterResult<Item> | null} */
     let result = null;
