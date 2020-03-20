@@ -1,6 +1,6 @@
 {
   "name": "fuzzbunny",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast fuzzy string matching with scoring and matched ranges",
   "main": "fuzzbunny.js",
   "types": "fuzzbunny.d.ts",
