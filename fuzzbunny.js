@@ -341,7 +341,7 @@ function fuzzyFilter(items, props, searchStr) {
         const valA = a.item[prop];
         const valB = b.item[prop];
         // @ts-ignore string comparison
-        diff = valA.localeCompare(valB);
+        diff = (valA || ``).localeCompare(valB);
       }
       return diff;
     });

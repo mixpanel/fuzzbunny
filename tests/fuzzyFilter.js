@@ -30,11 +30,34 @@ const heroes = heroesCsv
 function getHighlights(searchStr) {
   const results = fuzzyFilter(heroes, [`name`, `ability`], searchStr).map((result) => result.highlights);
   // ⇩ uncomment to generate expected values
-  // console.log(require(`util`).inspect(results, {depth: null, breakLength: 120}).replace(`'`, `\``));
+  // console.log(require(`util`).inspect(results, {depth: null, breakLength: 120}).replace(/'/g, `\``));
   return results;
 }
 
 describe(`fuzzyFilter`, function() {
+  it(`empty search preserves order`, function() {
+    assert.deepStrictEqual(getHighlights(``), [
+      {name: [`Claire Bennet`], ability: [`Rapid cellular regeneration`]},
+      {name: [`Elle Bishop`], ability: [`Electrokinesis`]},
+      {name: [`Monica Dawson`], ability: [`Adaptive muscle memory`]},
+      {name: [`EL Hawkins`], ability: [`Phasing`]},
+      {name: [`Maya Herrera`], ability: [`Poison emission`]},
+      {name: [`Isaac Mendez`], ability: [`Precognition`]},
+      {name: [`Adam Monroe`], ability: [`Immortality`]},
+      {name: [`Hiro Nakamura`], ability: [`Space-time manipulation`]},
+      {name: [`Matt Parkman`], ability: [`Telepathy`]},
+      {name: [`Angela Petrelli`], ability: [`Enhanced dreaming`]},
+      {name: [`Nathan Petrelli`], ability: [`Flight`]},
+      {name: [`Peterr Petrelli`], ability: [`Empathic mimicry then tactile power mimicry`]},
+      {name: [`Arthur Petrelli`], ability: [`Ability absorption`]},
+      {name: [`Micah Sanders`], ability: [`Technopathy`]},
+      {name: [`Niki Sanders`], ability: [`Enhanced strength`]},
+      {name: [`Tracy Strauss`], ability: [`Cryokinesis`]},
+      {name: [`Samuel Sullivan`], ability: [`Terrakinesis`]},
+      {name: [`Gabriel Gray / Sylar`], ability: [`Power mimicry and amplification`]},
+    ]);
+  });
+
   it(`matches at the beginning of a string`, function() {
     assert.deepStrictEqual(getHighlights(`TE`), [
       {ability: [``, `Te`, `lepathy`]},
