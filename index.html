@@ -154,8 +154,6 @@
           const filteredArticles = this.fuzzyFilterArticles(articles, searchFilter);
           const elapsedMs = Date.now() - startTime;
 
-          console.log(filteredArticles); // so user can see result format
-
           this.elRefs.results.innerHTML = filteredArticles
             .slice(0, numItemsToShow)
             .map(
