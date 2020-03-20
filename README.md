@@ -90,7 +90,7 @@ Fuzzbunny uses a scoring algorithm that prioritizes following signals. See `_get
 
 Example from demo:
 
-![image](https://user-images.githubusercontent.com/1018196/77127029-4fd71600-6a08-11ea-9361-be7a2edc8d0d.png)
+![image](https://user-images.githubusercontent.com/1018196/77127584-58305080-6a0a-11ea-9fee-d8eaf28744b8.png)
 
 ## Performance
 

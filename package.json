@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "test": "mocha tests/*.js",
-    "lint": "prettier --list-different {./*.js,tests/**.js}",
+    "lint": "prettier --list-different {./*.{js,html,md,yml},tests/**.js}",
     "gen-types": "tsc"
   },
   "repository": {
