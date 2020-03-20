@@ -1,6 +1,6 @@
 # FuzzBunny
 
-FuzzBunny is a small (1k) fast & memory efficient fuzzy string searching/matching/highlighting library with zero dependencies
+FuzzBunny is a small (1k), fast & memory efficient fuzzy string searching/matching/highlighting library with zero dependencies.
 
 [![Travis](https://img.shields.io/travis/mixpanel/fuzzbunny/master.svg)](https://travis-ci.org/mixpanel/fuzzbunny)
 [![npm](https://img.shields.io/npm/v/fuzzbunny.svg)](https://www.npmjs.com/package/fuzzbunny)
