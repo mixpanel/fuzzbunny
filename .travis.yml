@@ -7,3 +7,4 @@ before_script:
 script:
   - npm run test
   - npm run gen-types
+if: branch = master OR type = pull_request
