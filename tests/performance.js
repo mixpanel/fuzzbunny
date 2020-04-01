@@ -12,7 +12,7 @@ context(`performance`, function() {
   describe(`fuzzyMatchSanitized`, function() {
     it(`matches more than 500k lines/sec`, function() {
       this.slow(1000); // 1 second slow threshold
-      const linesPerSecLowBar = 500_000;
+      const linesPerSecLowBar = 500000;
       const words = [`oliver`, `alice`, `mayflo`, `declofusa`, `audio`];
       const startTime = Date.now();
       for (const word of words) {
