@@ -7,5 +7,3 @@ before_script:
 script:
   - npm run test
   - npm run gen-types
-branches:
-  only: master
