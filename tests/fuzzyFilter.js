@@ -35,7 +35,7 @@ function getHighlights(searchStr) {
 }
 
 describe(`fuzzyFilter`, function() {
-  it(`empty search preserves order`, function() {
+  it(`preserves original list order when search string is empty`, function() {
     assert.deepStrictEqual(getHighlights(``), [
       {name: [`Claire Bennet`], ability: [`Rapid cellular regeneration`]},
       {name: [`Elle Bishop`], ability: [`Electrokinesis`]},
