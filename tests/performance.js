@@ -24,9 +24,9 @@ context(`performance`, function() {
       const numLinesMatched = lines.length * words.length;
       const linesPerSec = Math.round((numLinesMatched * 1000) / elapsedTimeMs);
 
-      // in reality this is closer to 1M lines/sec but for testing we limit at 500k lines/sec
+      // MacBookPro runs at ~1M lines/sec, Travis CI at >700k lines/sec, we limit at 500k / sec as lower bound
       console.log(`${` `.repeat(6)}matched ${linesPerSec.toLocaleString()} lines/sec`);
-      assert.equal(linesPerSec > linesPerSecLowBar, true);
+      assert.ok(linesPerSec > linesPerSecLowBar, `matcher was toooo slooooooow`);
     });
   });
 });
