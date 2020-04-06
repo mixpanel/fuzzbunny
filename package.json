@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "test": "mocha tests/*.js",
-    "lint": "prettier --list-different {./*.{js,html,md,yml},tests/**.js}",
+    "lint": "prettier --list-different {./*.{js,md,yml},tests/**.js,docs/*.{ts,css,html,json}}",
     "gen-types": "tsc",
     "gen-demo": "NODE_ENV=production webpack --config docs/webpack.config.js",
     "prepublishOnly": "npm run gen-types && npm run gen-demo"
