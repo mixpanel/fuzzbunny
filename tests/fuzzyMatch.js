@@ -54,4 +54,9 @@ describe(`fuzzyMatch`, function() {
     assert.deepStrictEqual(fuzzyMatch(`Las Vegas`, `"la`).highlights, [``, `La`, `s Vegas`]);
     assert.deepStrictEqual(fuzzyMatch(`Los Angeles`, `"LA`), null);
   });
+
+  it(`quotes in middle of search string performs regular match`, function() {
+    assert.deepStrictEqual(fuzzyMatch(`abc "def"`, `a"def"`).highlights, [``, `a`, `bc `, `"def"`]);
+    assert.deepStrictEqual(fuzzyMatch(`Las Vegas`, `la"`), null);
+  });
 });
