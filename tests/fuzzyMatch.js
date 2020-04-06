@@ -1,62 +1,57 @@
 const assert = require(`assert`);
 const {fuzzyMatch} = require(`../fuzzbunny`);
 
-function getHighlights(targetStr, searchStr) {
-  const match = fuzzyMatch(targetStr, searchStr);
-  return match && match.highlights;
-}
-
 describe(`fuzzyMatch`, function() {
   it(`matches at the beginning of a string`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `abc`), [``, `abc`, `defg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `abc`).highlights, [``, `abc`, `defg`]);
   });
 
   it(`matches in the middle/end of a string`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `def`), [`abc`, `def`, `g`]);
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `efg`), [`abcd`, `efg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `def`).highlights, [`abc`, `def`, `g`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `efg`).highlights, [`abcd`, `efg`]);
   });
 
   it(`returns null for non-matches`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `zx`), null);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `zx`), null);
   });
 
   it(`matches prefix filter characters (fuzzy)`, function() {
-    assert.deepStrictEqual(getHighlights(`ab cdefg`, `ac`), [``, `a`, `b `, `c`, `defg`]);
+    assert.deepStrictEqual(fuzzyMatch(`ab cdefg`, `ac`).highlights, [``, `a`, `b `, `c`, `defg`]);
   });
 
   it(`is case-insensitive`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `dEf`), [`abc`, `def`, `g`]);
-    assert.deepStrictEqual(getHighlights(`abCDEfg`, `dEF`), [`abC`, `DEf`, `g`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `dEf`).highlights, [`abc`, `def`, `g`]);
+    assert.deepStrictEqual(fuzzyMatch(`abCDEfg`, `dEF`).highlights, [`abC`, `DEf`, `g`]);
   });
 
   it(`ignores whitespace padding`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `   def`), [`abc`, `def`, `g`]);
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `abc   `), [``, `abc`, `defg`]);
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `  abc `), [``, `abc`, `defg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `   def`).highlights, [`abc`, `def`, `g`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `abc   `).highlights, [``, `abc`, `defg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `  abc `).highlights, [``, `abc`, `defg`]);
   });
 
   it(`matches when one search term is a substring of another`, function() {
-    assert.deepStrictEqual(getHighlights(`This is a test`, `this is`), [``, `This is`, ` a test`]);
-    assert.deepStrictEqual(getHighlights(`This should not match`, `this is`), null);
+    assert.deepStrictEqual(fuzzyMatch(`This is a test`, `this is`).highlights, [``, `This is`, ` a test`]);
+    assert.deepStrictEqual(fuzzyMatch(`This should not match`, `this is`), null);
   });
 
   it(`matches when no filter string is passed`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, ``), [`abcdefg`]);
-    assert.deepStrictEqual(getHighlights(`abcdefg`, null), [`abcdefg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, ``).highlights, [`abcdefg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, null).highlights, [`abcdefg`]);
   });
 
   it(`merges contiguous matches`, function() {
-    assert.deepStrictEqual(getHighlights(`abcd efg`, `bcd efg`), [`a`, `bcd efg`]);
+    assert.deepStrictEqual(fuzzyMatch(`abcd efg`, `bcd efg`).highlights, [`a`, `bcd efg`]);
   });
 
   it(`does not match when one or more space-separated terms do not match`, function() {
-    assert.deepStrictEqual(getHighlights(`abcdefg`, `abc xxx`), null);
+    assert.deepStrictEqual(fuzzyMatch(`abcdefg`, `abc xxx`), null);
   });
 
   it(`matches only substrings when filter string is quoted`, function() {
-    assert.deepStrictEqual(getHighlights(`a b c abC def`, `"abc d"`), [`a b c `, `abC d`, `ef`]);
-    assert.deepStrictEqual(getHighlights(`a bc def`, `"abc d"`), null);
-    assert.deepStrictEqual(getHighlights(`Las Vegas`, `"la`), [``, `La`, `s Vegas`]);
-    assert.deepStrictEqual(getHighlights(`Los Angeles`, `"LA`), null);
+    assert.deepStrictEqual(fuzzyMatch(`a b c abC def`, `"abc d"`).highlights, [`a b c `, `abC d`, `ef`]);
+    assert.deepStrictEqual(fuzzyMatch(`a bc def`, `"abc d"`), null);
+    assert.deepStrictEqual(fuzzyMatch(`Las Vegas`, `"la`).highlights, [``, `La`, `s Vegas`]);
+    assert.deepStrictEqual(fuzzyMatch(`Los Angeles`, `"LA`), null);
   });
 });
