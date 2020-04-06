@@ -84,18 +84,58 @@ describe(`fuzzyFilter`, function() {
   });
 
   it(`sorts by score, then alphabetically`, function() {
-    const results = fuzzyFilter(heroes, [`name`, `ability`], `el`).map(({item, score}) => ({score, name: item.name}));
+    const results = fuzzyFilter(heroes, [`name`, `ability`], `el`);
     assert.deepStrictEqual(results, [
-      {score: 2200, name: 'EL Hawkins'},
-      {score: 2200, name: 'Elle Bishop'},
-      {score: 1200, name: 'Angela Petrelli'},
-      {score: 1200, name: 'Arthur Petrelli'},
-      {score: 1200, name: 'Claire Bennet'},
-      {score: 1200, name: 'Gabriel Gray / Sylar'},
-      {score: 1200, name: 'Matt Parkman'},
-      {score: 1200, name: 'Nathan Petrelli'},
-      {score: 1200, name: 'Peterr Petrelli'},
-      {score: 1200, name: 'Samuel Sullivan'},
+      {
+        item: {name: `EL Hawkins`, ability: `Phasing`},
+        score: 2200,
+        highlights: {name: [``, `EL`, ` Hawkins`]},
+      },
+      {
+        item: {name: `Elle Bishop`, ability: `Electrokinesis`},
+        score: 2200,
+        highlights: {name: [``, `El`, `le Bishop`], ability: [``, `El`, `ectrokinesis`]},
+      },
+      {
+        item: {name: `Angela Petrelli`, ability: `Enhanced dreaming`},
+        score: 1200,
+        highlights: {name: [`Ang`, `el`, `a Petrelli`]},
+      },
+      {
+        item: {name: `Arthur Petrelli`, ability: `Ability absorption`},
+        score: 1200,
+        highlights: {name: [`Arthur Petr`, `el`, `li`]},
+      },
+      {
+        item: {name: `Claire Bennet`, ability: `Rapid cellular regeneration`},
+        score: 1200,
+        highlights: {ability: [`Rapid c`, `el`, `lular regeneration`]},
+      },
+      {
+        item: {name: `Gabriel Gray / Sylar`, ability: `Power mimicry and amplification`},
+        score: 1200,
+        highlights: {name: [`Gabri`, `el`, ` Gray / Sylar`]},
+      },
+      {
+        item: {name: `Matt Parkman`, ability: `Telepathy`},
+        score: 1200,
+        highlights: {ability: [`T`, `el`, `epathy`]},
+      },
+      {
+        item: {name: `Nathan Petrelli`, ability: `Flight`},
+        score: 1200,
+        highlights: {name: [`Nathan Petr`, `el`, `li`]},
+      },
+      {
+        item: {name: `Peterr Petrelli`, ability: `Empathic mimicry then tactile power mimicry`},
+        score: 1200,
+        highlights: {name: [`Peterr Petr`, `el`, `li`]},
+      },
+      {
+        item: {name: `Samuel Sullivan`, ability: `Terrakinesis`},
+        score: 1200,
+        highlights: {name: [`Samu`, `el`, ` Sullivan`]},
+      },
     ]);
   });
 });
