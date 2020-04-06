@@ -3,7 +3,7 @@ const assert = require(`assert`);
 const {fuzzyMatchSanitized} = require('../fuzzbunny');
 
 const lines = fs
-  .readFileSync(`${__dirname}/fixtures/gutenberg-catalog.txt`, 'utf-8')
+  .readFileSync(`${__dirname}/../docs/gutenberg-catalog.txt`, 'utf-8')
   .trim()
   .split(`\n`)
   .slice(1); // ignore attribution comment on first line

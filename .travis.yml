@@ -6,5 +6,5 @@ before_script:
   - npm run lint
 script:
   - npm run test
-  - npm run gen-types
+  - npm run prepublishOnly
 if: branch = master OR type = pull_request

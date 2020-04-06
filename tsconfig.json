@@ -1,17 +1,9 @@
 {
+  "extends": "./tsconfig-base.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es2019"],
-    "allowJs": true,
-    "checkJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outFile": "fuzzbunny.d.ts",
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "outFile": "fuzzbunny.d.ts"
   },
   "files": ["fuzzbunny.js"]
 }

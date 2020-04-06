@@ -12,7 +12,7 @@
     "test": "mocha tests/*.js",
     "lint": "prettier --list-different {./*.{js,html,md,yml},tests/**.js}",
     "gen-types": "tsc",
-    "gen-demo": "",
+    "gen-demo": "NODE_ENV=production webpack --config docs/webpack.config.js",
     "prepublishOnly": "npm run gen-types && npm run gen-demo"
   },
   "repository": {
@@ -35,9 +35,14 @@
   },
   "homepage": "https://github.com/mixpanel/fuzzbunny#readme",
   "devDependencies": {
+    "@types/node": "13.11.0",
     "eslint": "6.8.0",
     "mocha": "7.1.0",
     "prettier": "1.19.1",
-    "typescript": "3.8.3"
+    "raw-loader": "4.0.0",
+    "ts-loader": "6.2.2",
+    "typescript": "3.8.3",
+    "webpack": "4.42.1",
+    "webpack-cli": "^3.3.11"
   }
 }
