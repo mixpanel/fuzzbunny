@@ -11,7 +11,9 @@
   "scripts": {
     "test": "mocha tests/*.js",
     "lint": "prettier --list-different {./*.{js,html,md,yml},tests/**.js}",
-    "gen-types": "tsc"
+    "gen-types": "tsc",
+    "gen-demo": "",
+    "prepublishOnly": "npm run gen-types && npm run gen-demo"
   },
   "repository": {
     "type": "git",

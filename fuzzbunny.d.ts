@@ -12,11 +12,13 @@ declare module "fuzzbunny" {
      * Searches an array of items on props and returns filtered + sorted array with scores and highlights
      * @template Item
      * @param {Item[]} items
-     * @param {(keyof Item)[]} props
      * @param {string} searchStr
+     * @param {{fields: (keyof Item)[]}} options
      * @returns {FuzzyFilterResult<Item>[]}
      */
-    export function fuzzyFilter<Item>(items: Item[], props: (keyof Item)[], searchStr: string): {
+    export function fuzzyFilter<Item>(items: Item[], searchStr: string, options: {
+        fields: (keyof Item)[];
+    }): {
         item: Item;
         score: number;
         highlights: { [K in keyof Item]?: string[] | undefined; };
