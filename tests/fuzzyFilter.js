@@ -28,7 +28,7 @@ const heroes = heroesCsv
   .map(([name, ability]) => ({name, ability}));
 
 function getHighlights(searchStr) {
-  const results = fuzzyFilter(heroes, [`name`, `ability`], searchStr).map((result) => result.highlights);
+  const results = fuzzyFilter(heroes, searchStr, {fields: [`name`, `ability`]}).map((result) => result.highlights);
   // ⇩ uncomment to generate expected values
   // console.log(require(`util`).inspect(results, {depth: null, breakLength: 120}).replace(/'/g, `\``));
   return results;
@@ -84,7 +84,7 @@ describe(`fuzzyFilter`, function() {
   });
 
   it(`sorts by score, then alphabetically`, function() {
-    const results = fuzzyFilter(heroes, [`name`, `ability`], `el`);
+    const results = fuzzyFilter(heroes, `el`, {fields: [`name`, `ability`]});
     assert.deepStrictEqual(results, [
       {
         item: {name: `EL Hawkins`, ability: `Phasing`},

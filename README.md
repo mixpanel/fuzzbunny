@@ -43,8 +43,8 @@ const heroes = [
   },
 ];
 
-// Use fuzzyFilter to filter an array of items and get filtered + score-sorted results with highlights.
-const results = fuzzyFilter(heroes, [`name`, `ability`], `stm`);
+// Use fuzzyFilter to filter an array of items on specific fields and get filtered + score-sorted results with highlights.
+const results = fuzzyFilter(heroes, `stm`, {fields: [`name`, `ability`]});
 /*
 results = [
   {

@@ -298,31 +298,31 @@ function fuzzyMatch(targetStr, searchStr) {
  * Searches an array of items on props and returns filtered + sorted array with scores and highlights
  * @template Item
  * @param {Item[]} items
- * @param {(keyof Item)[]} props
  * @param {string} searchStr
+ * @param {{fields: (keyof Item)[]}} options
  * @returns {FuzzyFilterResult<Item>[]}
  */
-function fuzzyFilter(items, props, searchStr) {
+function fuzzyFilter(items, searchStr, options) {
   /** @type {FuzzyFilterResult<Item>[]} */
   const results = [];
   const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();
-
-  if (!Array.isArray(props) || props.length == 0) {
-    throw new Error(`empty props, did you forget to pass props?`);
+  const fields = options ? options.fields : null;
+  if (!fields || !Array.isArray(fields) || fields.length == 0) {
+    throw new Error(`invalid fields, did you forget to pass {fields: [...]} as options param?`);
   }
 
   for (const item of items) {
     /** @type {FuzzyFilterResult<Item> | null} */
     let result = null;
-    for (const prop of props) {
-      const value = item[prop];
+    for (const field of fields) {
+      const value = item[field];
       if (typeof value === `string` && value) {
         const valueStrLowerCased = value.toLowerCase();
         const match = fuzzyMatchSanitized(valueStrLowerCased, searchStrLowerCased);
         if (match) {
           result = result || {item, score: 0, highlights: {}};
           result.score = Math.max(match.score, result.score);
-          result.highlights[prop] = highlightsFromRanges(value, match.ranges);
+          result.highlights[field] = highlightsFromRanges(value, match.ranges);
         }
       }
     }
@@ -334,12 +334,12 @@ function fuzzyFilter(items, props, searchStr) {
   // sort if searchStr is not empty, otherwise preserve original order, since its a pass through
   if (searchStrLowerCased) {
     results.sort((a, b) => {
-      // sort by score, then alphabetically by each prop
+      // sort by score, then alphabetically by each field
       let diff = b.score - a.score;
-      for (let i = 0, len = props.length; diff === 0 && i < len; ++i) {
-        const prop = props[i];
-        const valA = a.item[prop];
-        const valB = b.item[prop];
+      for (let i = 0, len = fields.length; diff === 0 && i < len; ++i) {
+        const field = fields[i];
+        const valA = a.item[field];
+        const valB = b.item[field];
         // @ts-ignore string comparison
         diff = (valA || ``).localeCompare(valB);
       }
