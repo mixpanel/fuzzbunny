@@ -84,14 +84,26 @@ match = {
 
 `fuzzbunny` uses a scoring algorithm that prioritizes following signals. See `_getMatchScore` function.
 
+Example 1:
+
 - Start of string - `{Mayfl}ower` ranks above `The {Mayfl}ower`
 - Closer to start - `The {Mayfl}ower` ranks above `Story of the {Mayfl}ower`
 - Contiguous length - `The {Mayfl}ower` ranks above `{May} {fl}ower`
 - Alphabetically - `The {May} {fl}ower` ranks above `This {May} {fl}ower`
 
-Example from demo:
-
 ![image](https://user-images.githubusercontent.com/1018196/77127584-58305080-6a0a-11ea-9fee-d8eaf28744b8.png)
+
+Example 2:
+
+```js
+const f = require(`fuzzbunny`);
+f.fuzzyMatch(`Gobbling pupusas`, `usa`);
+// {score: 2700, highlights: ['Gobbling pup', 'usa', 's']}
+f.fuzzyMatch(`United Sheets of Antarctica`, `usa`);
+// {score: 2276, highlights: ['', 'U', 'nited ', 'S', 'heets of ', 'A', 'ntarctica']}
+```
+
+`Gobbling pup{usa}s` wins because 3 letter contiguous sequence yields a higher score.
 
 **NOTE**: `fuzzbunny` optmizes for meaningful results. It only does substring/prefix/acronym-matching, not greedy matching.
 
