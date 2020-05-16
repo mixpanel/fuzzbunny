@@ -55,7 +55,7 @@ describe(`fuzzyMatch`, function() {
     assert.deepStrictEqual(fuzzyMatch(`Los Angeles`, `"LA`), null);
   });
 
-  it(`quotes in middle of search string performs regular match`, function() {
+  it(`performs regular match when quotes appear in middle of search string`, function() {
     assert.deepStrictEqual(fuzzyMatch(`abc "def"`, `a"def"`).highlights, [``, `a`, `bc `, `"def"`]);
     assert.deepStrictEqual(fuzzyMatch(`Las Vegas`, `la"`), null);
   });
