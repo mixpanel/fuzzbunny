@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig-base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outFile": "fuzzbunny.d.ts"
+  },
+  "files": ["fuzzbunny.js"]
+}

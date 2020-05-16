@@ -1,10 +1,19 @@
 {
   "name": "fuzzbunny",
-  "version": "1.0.0",
-  "description": "Fast fuzzy string matching with scoring and matched segments",
-  "main": "index.js",
+  "version": "1.0.1",
+  "description": "Fast fuzzy string matching with scoring and matched ranges",
+  "main": "fuzzbunny.js",
+  "types": "fuzzbunny.d.ts",
+  "files": [
+    "fuzzbunny.js",
+    "fuzzbunny.d.ts"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests/*.js",
+    "lint": "prettier --list-different {./*.{js,md,yml},tests/**.js,docs/*.{ts,css,html,json}}",
+    "gen-types": "tsc",
+    "gen-demo": "NODE_ENV=production webpack --config docs/webpack.config.js",
+    "prepublishOnly": "npm run gen-types && npm run gen-demo"
   },
   "repository": {
     "type": "git",
@@ -15,7 +24,7 @@
     "string",
     "match",
     "scoring",
-    "segments",
+    "ranges",
     "highlight",
     "bunny"
   ],
@@ -24,5 +33,16 @@
   "bugs": {
     "url": "https://github.com/mixpanel/fuzzbunny/issues"
   },
-  "homepage": "https://github.com/mixpanel/fuzzbunny#readme"
+  "homepage": "https://github.com/mixpanel/fuzzbunny#readme",
+  "devDependencies": {
+    "@types/node": "13.11.0",
+    "eslint": "6.8.0",
+    "mocha": "7.1.0",
+    "prettier": "1.19.1",
+    "raw-loader": "4.0.0",
+    "ts-loader": "6.2.2",
+    "typescript": "3.8.3",
+    "webpack": "4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
 }
