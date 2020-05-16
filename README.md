@@ -1,6 +1,6 @@
 # fuzzbunny
 
-`fuzzbunny` is a small (1k), fast & memory efficient fuzzy string searching/matching/highlighting library with zero dependencies.
+`fuzzbunny` is a small (1k), fast & memory efficient fuzzy string searching/matching/highlighting library.
 It works equally well in a browser environment or Node.js.
 
 [![Travis](https://img.shields.io/travis/mixpanel/fuzzbunny/master.svg)](https://travis-ci.org/mixpanel/fuzzbunny)
@@ -8,9 +8,19 @@ It works equally well in a browser environment or Node.js.
 [![npm](https://img.shields.io/npm/dm/fuzzbunny.svg)](https://www.npmjs.com/package/fuzzbunny)
 [![npm](https://img.shields.io/npm/l/fuzzbunny.svg)](https://github.com/mixpanel/fuzzbunny/blob/master/LICENCE)
 
+## Why fuzzbunny?
+
+- **Human friendly** - fuzzbunny scoring and algorithm is more tuned to "human" searching patterns. It surfaces what you're looking for with minimal keystrokes.
+- **Lightweight** - ~3KB minified and has zero dependencies.
+- **Ultra fast** - ~million lines/second on a 2.4Ghz virtual core.
+
+Other similar libraries are [fuzzymatch](https://www.npmjs.com/package/fuzzymatch), [fuzzy](https://www.npmjs.com/package/fuzzy), [fuzzy-search](fuzzy-search), [fuzzyjs](fuzzyjs).
+
+`fuzzbunny` aims to be nimble and fast. It has a simple api that can easily be integrated with any frontend library to build great search UI. We use it at [mixpanel.com](https://mixpanel.com) to power our UI dropdowns and tables.
+
 ## Installation
 
-`npm install --save fuzzbunny`
+`npm install --save fuzzbunny` or `yarn add fuzzbunny`
 
 ## Demo
 
