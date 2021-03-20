@@ -59,4 +59,18 @@ describe(`fuzzyMatch`, function() {
     assert.deepStrictEqual(fuzzyMatch(`abc "def"`, `a"def"`).highlights, [``, `a`, `bc `, `"def"`]);
     assert.deepStrictEqual(fuzzyMatch(`Las Vegas`, `la"`), null);
   });
+
+  it.only(`matches initials in camelCase and TitleCase strings`, function() {
+    assert.deepStrictEqual(fuzzyMatch(`FuzzBunny`, `fb`).highlights, [``, `F`, `uzz`, `B`, `unny`]);
+    assert.deepStrictEqual(fuzzyMatch(`fuzzBunny.ts`, `fb`).highlights, [``, `f`, `uzz`, `B`, `unny.ts`]);
+    assert.deepStrictEqual(fuzzyMatch(`fuzzBunnyIsAwesome`, `bia`).highlights, [
+      `fuzz`,
+      `B`,
+      `unny`,
+      `I`,
+      `s`,
+      `A`,
+      `wesome`,
+    ]);
+  });
 });
