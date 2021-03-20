@@ -3,7 +3,7 @@
 `fuzzbunny` is a small (1k), fast & memory efficient fuzzy string searching/matching/highlighting library.
 It works equally well in a browser environment or Node.js.
 
-[![Travis](https://img.shields.io/travis/mixpanel/fuzzbunny/master.svg)](https://travis-ci.org/mixpanel/fuzzbunny)
+![Build Status](https://github.com/mixpanel/fuzzbunny/actions/workflows/tests.yml/badge.svg)
 [![npm](https://img.shields.io/npm/v/fuzzbunny.svg)](https://www.npmjs.com/package/fuzzbunny)
 [![npm](https://img.shields.io/npm/dm/fuzzbunny.svg)](https://www.npmjs.com/package/fuzzbunny)
 [![npm](https://img.shields.io/npm/l/fuzzbunny.svg)](https://github.com/mixpanel/fuzzbunny/blob/master/LICENCE)
