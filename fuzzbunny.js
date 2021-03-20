@@ -209,7 +209,7 @@ function highlightsFromRanges(targetStr, ranges) {
 }
 
 /**
- * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
+ * fuzzyScoreItem is called by fuzzyMatch, it's a slightly lower level call
  * If perf is of importance and you want to avoid lowercase + trim + highlighting on every item
  * Use this and only call highlightsFromRanges for only the items that are displayed
  * @param {string} targetStr - lowercased trimmed target string to search on
@@ -360,4 +360,4 @@ function fuzzyFilter(items, searchStr, options) {
   return results;
 }
 
-module.exports = {fuzzyFilter, fuzzyMatch, fuzzyMatchSanitized: fuzzyScoreItem, highlightsFromRanges};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};
