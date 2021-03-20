@@ -11,9 +11,9 @@ declare module "fuzzbunny" {
         fields: (keyof Item)[];
         /**
          * - maximum number of results that will be displayed in UI.
-         * Since sorting large arrays is expensive, only top N items are sorted
+         * Since sorting large arrays is expensive, only top N results are sorted by score
          */
-        numMaxResults?: number;
+        numResultsShown?: number;
     };
     /**
      * @template Item
@@ -23,8 +23,8 @@ declare module "fuzzbunny" {
      * @template Item
      * @typedef {Object} FuzzyFilterOptions
      * @prop {(keyof Item)[]} fields - fields of the item object that will be searched
-     * @prop {number} [numMaxResults] - maximum number of results that will be displayed in UI.
-     *   Since sorting large arrays is expensive, only top N items are sorted
+     * @prop {number} [numResultsShown] - maximum number of results that will be displayed in UI.
+     *   Since sorting large arrays is expensive, only top N results are sorted by score
      */
     /**
      * Searches an array of items on props and returns filtered + sorted array with scores and highlights

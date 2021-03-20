@@ -125,7 +125,6 @@ async function fetchArticles() {
 }
 class ArticleList {
     constructor(articles, elRefs) {
-        this.searchFilterDebounceTimeout = -1;
         this.state = {
             articles,
             numItemsToShow: NUM_INITIAL_ITEMS_TO_SHOW,
@@ -145,15 +144,7 @@ class ArticleList {
         this.elRefs.results.scrollTop = 0;
         const searchFilter = ev.currentTarget.value;
         const numItemsToShow = NUM_INITIAL_ITEMS_TO_SHOW;
-        // debounce searchFilter for 100ms if input length is <= 3
-        // for large set of results (>10k) the native js .sort() overheard could be >100ms
-        window.clearTimeout(this.searchFilterDebounceTimeout);
-        if (searchFilter && searchFilter.length <= 3) {
-            this.searchFilterDebounceTimeout = window.setTimeout(() => this.update({ searchFilter, numItemsToShow }), 100);
-        }
-        else {
-            this.update({ searchFilter, numItemsToShow });
-        }
+        this.update({ searchFilter, numItemsToShow });
     }
     handleResultsScroll(ev) {
         const { articles, numItemsToShow } = this.state;
@@ -167,8 +158,8 @@ class ArticleList {
         }
     }
     fuzzyFilterArticles() {
-        const { articles, searchFilter } = this.state;
-        return fuzzyFilter(articles, searchFilter, { fields: [`name`] });
+        const { articles, searchFilter, numItemsToShow } = this.state;
+        return fuzzyFilter(articles, searchFilter, { fields: [`name`], numResultsShown: numItemsToShow });
     }
     render() {
         const { numItemsToShow } = this.state;
@@ -236,8 +227,10 @@ function _getMatchScore(idx, len, isPrefix) {
 
 // Ascii codes: <w_space>!"#$%&'()*+,-./0123456789:;<=>?@
 // ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
-const CODE_A = `a`.charCodeAt(0);
-const CODE_Z = `z`.charCodeAt(0);
+const CODE_a = `a`.charCodeAt(0);
+const CODE_z = `z`.charCodeAt(0);
+const CODE_A = `A`.charCodeAt(0);
+const CODE_Z = `Z`.charCodeAt(0);
 const CODE_0 = `0`.charCodeAt(0);
 const CODE_9 = `9`.charCodeAt(0);
 const CODE_EXCL_MARK = `!`.charCodeAt(0);
@@ -254,11 +247,19 @@ const CODE_START_UNICODE = 127;
  * @param {number} charCode
  * @returns {boolean}
  */
+function _isUpperCase(charCode) {
+  return charCode >= CODE_A && charCode <= CODE_Z;
+}
+
+/**
+ * @param {number} charCode
+ * @returns {boolean}
+ */
 function _isCodeAlphaNum(charCode) {
   // 0 - 126 charCodes are ascii, 127 onwards are unicode code points
-  // str will be lowercased so we only check for lowercased codes
   return (
-    (charCode >= CODE_A && charCode <= CODE_Z) ||
+    (charCode >= CODE_a && charCode <= CODE_z) ||
+    _isUpperCase(charCode) ||
     (charCode >= CODE_0 && charCode <= CODE_9) ||
     charCode >= CODE_START_UNICODE
   );
@@ -290,18 +291,19 @@ function _isCodePunctuation(charCode) {
 function _getTargetSkips(targetStr) {
   const targetSkips = [];
   let wasAlphaNum = false;
+  let wasUpperCase = false;
 
   for (let i = 0, len = targetStr.length; i < len; ++i) {
     const code = targetStr.charCodeAt(i);
     const isAlphaNum = _isCodeAlphaNum(code);
+    const isUpperCase = _isUpperCase(code);
 
-    if (isAlphaNum && !wasAlphaNum) {
-      targetSkips.push(i);
-    } else if (_isCodePunctuation(code)) {
+    if ((isAlphaNum && !wasAlphaNum) || (isUpperCase && !wasUpperCase) || _isCodePunctuation(code)) {
       targetSkips.push(i);
     }
 
     wasAlphaNum = isAlphaNum;
+    wasUpperCase = isUpperCase;
   }
 
   // We push the length as the last skip so when matching
@@ -406,14 +408,14 @@ function highlightsFromRanges(targetStr, ranges) {
 }
 
 /**
- * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
+ * fuzzyScoreItem is called by fuzzyMatch, it's a slightly lower level call
  * If perf is of importance and you want to avoid lowercase + trim + highlighting on every item
  * Use this and only call highlightsFromRanges for only the items that are displayed
  * @param {string} targetStr - lowercased trimmed target string to search on
  * @param {string} searchStr - lowercased trimmed search string
  * @returns {{score: number, ranges: number[]} | null} - null if no match
  */
-function fuzzyMatchSanitized(targetStr, searchStr) {
+function fuzzyScoreItem(targetStr, searchStr) {
   if (!targetStr) {
     return null;
   }
@@ -429,14 +431,15 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   // if user enters a quoted search then only perform substring match
   // e.g "la matches [{La}s Vegas] but not [Los Angeles]
   // NOTE: ending quote is optional so user can get incremental matching as they type.
-  const isQuotedSearchStr = searchStr.startsWith(`"`);
+  const isQuotedSearchStr = searchStr[0] === '"';
   if (isQuotedSearchStr) {
     searchStr = searchStr.slice(1, searchStr.endsWith(`"`) ? -1 : searchStr.length);
   }
 
   // try substring search first
   // js engine uses boyer moore algo which is very fast O(m/n)
-  const matchIdx = targetStr.indexOf(searchStr);
+  const lCaseTargetStr = targetStr.toLowerCase();
+  const matchIdx = lCaseTargetStr.indexOf(searchStr);
   const searchLen = searchStr.length;
 
   if (matchIdx >= 0) {
@@ -459,9 +462,9 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   const targetSkips = _getTargetSkips(targetStr);
 
   for (let skipIdx = 0, skipLen = targetSkips.length - 1; skipIdx < skipLen; ++skipIdx) {
-    if (targetStr[targetSkips[skipIdx]] === searchStr[0]) {
+    if (lCaseTargetStr[targetSkips[skipIdx]] === searchStr[0]) {
       // possible alignment, perform prefix match
-      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips);
+      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, lCaseTargetStr, targetSkips);
       if (ranges) {
         let score = 0;
         for (let i = 0, len = ranges.length; i < len; i += 2) {
@@ -484,8 +487,7 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
 function fuzzyMatch(targetStr, searchStr) {
   targetStr = targetStr || ``;
   searchStr = (searchStr || ``).trim().toLowerCase();
-  const targetSanitizedStr = targetStr.toLowerCase();
-  const match = fuzzyMatchSanitized(targetSanitizedStr, searchStr);
+  const match = fuzzyScoreItem(targetStr, searchStr);
 
   if (match) {
     return {
@@ -503,18 +505,35 @@ function fuzzyMatch(targetStr, searchStr) {
  */
 
 /**
+ * @template Item
+ * @typedef {Object} FuzzyFilterOptions
+ * @prop {(keyof Item)[]} fields - fields of the item object that will be searched
+ * @prop {number} [numResultsShown] - maximum number of results that will be displayed in UI.
+ *   Since sorting large arrays is expensive, only top N results are sorted by score
+ */
+
+/**
  * Searches an array of items on props and returns filtered + sorted array with scores and highlights
  * @template Item
- * @param {Item[]} items
- * @param {string} searchStr
- * @param {{fields: (keyof Item)[]}} options
+ * @param {Item[]} items - list of objects to search on
+ * @param {string} searchStr - the search string
+ * @param {FuzzyFilterOptions<Item>} options - what fields to search on, and other options
  * @returns {FuzzyFilterResult<Item>[]}
+ *
+ * @example
+ *  fuzzyFilter([
+ *    {frist: 'Hello', last: 'World'},
+ *    {frist: 'Foo', last: 'Bar'},
+ *  ], {
+ *    fields: ['first', 'last'],
+ *  })
  */
 function fuzzyFilter(items, searchStr, options) {
   /** @type {FuzzyFilterResult<Item>[]} */
-  const results = [];
-  const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();
-  const fields = options ? options.fields : null;
+  let results = [];
+  const lcaseSearchStr = (searchStr || ``).trim().toLowerCase();
+  const {fields, numResultsShown} = options;
+
   if (!fields || !Array.isArray(fields) || fields.length == 0) {
     throw new Error(`invalid fields, did you forget to pass {fields: [...]} as options param?`);
   }
@@ -525,8 +544,7 @@ function fuzzyFilter(items, searchStr, options) {
     for (const field of fields) {
       const value = item[field];
       if (typeof value === `string` && value) {
-        const valueStrLowerCased = value.toLowerCase();
-        const match = fuzzyMatchSanitized(valueStrLowerCased, searchStrLowerCased);
+        const match = fuzzyScoreItem(value, lcaseSearchStr);
         if (match) {
           result = result || {item, score: 0, highlights: {}};
           result.score = Math.max(match.score, result.score);
@@ -540,8 +558,8 @@ function fuzzyFilter(items, searchStr, options) {
   }
 
   // sort if searchStr is not empty, otherwise preserve original order, since its a pass through
-  if (searchStrLowerCased) {
-    results.sort((a, b) => {
+  if (lcaseSearchStr) {
+    const sortCompareFn = (/** @type {FuzzyFilterResult<Item>} */ a, /** @type {FuzzyFilterResult<Item>} */ b) => {
       // sort by score, then alphabetically by each field
       let diff = b.score - a.score;
       for (let i = 0, len = fields.length; diff === 0 && i < len; ++i) {
@@ -552,13 +570,22 @@ function fuzzyFilter(items, searchStr, options) {
         diff = (valA || ``).localeCompare(valB);
       }
       return diff;
-    });
+    };
+
+    // reverse bubble sort is O(n^2), quick sort which v8 uses is O(n(log n))
+    // however if we're only sorting top X items, then reverse bubble sort is O(Xn)
+    // which is much faster than sorting the full array if X is much smaller than n
+    if (numResultsShown && numResultsShown < results.length / 4) {
+      results;
+    } else {
+      results.sort(sortCompareFn);
+    }
   }
 
   return results;
 }
 
-module.exports = {fuzzyFilter, fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};
 
 
 /***/ })
