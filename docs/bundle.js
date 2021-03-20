@@ -573,16 +573,46 @@ function fuzzyFilter(items, searchStr, options) {
     };
 
     // reverse bubble sort is O(n^2), quick sort which v8 uses is O(n(log n))
-    // however if we're only sorting top X items, then reverse bubble sort is O(Xn)
+    // however if we're only sorting top X items, then bubble sort is O(Xn)
     // which is much faster than sorting the full array if X is much smaller than n
-    if (numResultsShown && numResultsShown < results.length / 4) {
-      results;
+    // if (numResultsShown && numResultsShown < results.length) {
+    if (numResultsShown && numResultsShown < results.length / 5) {
+      inPlaceTopNScoreSort(results, numResultsShown);
     } else {
       results.sort(sortCompareFn);
     }
   }
 
   return results;
+}
+
+/**
+ * Only sorts top N items in-place using bubble sort
+ * @template Item
+ * @param {Array<FuzzyFilterResult<Item>>} items - list of objects to search on
+ * @param {number} numTopN
+ * @returns {Array<FuzzyFilterResult<Item>>}
+ */
+function inPlaceTopNScoreSort(items, numTopN) {
+  const numItems = items.length;
+
+  for (let n = 0; n < numTopN; ++n) {
+    let maxIdx = n;
+    let maxScore = items[maxIdx].score;
+    for (let i = n + 1; i < numItems; ++i) {
+      if (items[n].score > maxScore) {
+        maxIdx = i;
+        maxScore = items[maxIdx].score;
+      }
+    }
+    // swap n with maxIdx
+    let temp = items[n];
+    items[n] = items[maxIdx];
+    items[maxIdx] = temp;
+  }
+
+  console.log(`inplace`, items.slice(0, numTopN), numTopN);
+  return items;
 }
 
 module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};
