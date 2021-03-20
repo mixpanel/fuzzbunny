@@ -306,12 +306,28 @@ function fuzzyMatch(targetStr, searchStr) {
  */
 
 /**
+ * @template Item
+ * @typedef {Object} FuzzyFilterOptions
+ * @prop {(keyof Item)[]} fields - fields of the item object that will be searched
+ * @prop {number} [numMaxResults] - maximum number of results that will be displayed in UI.
+ *   Since sorting large arrays is expensive, only top N items are sorted
+ */
+
+/**
  * Searches an array of items on props and returns filtered + sorted array with scores and highlights
  * @template Item
- * @param {Item[]} items
- * @param {string} searchStr
- * @param {{fields: (keyof Item)[]}} options
+ * @param {Item[]} items - list of objects to search on
+ * @param {string} searchStr - the search string
+ * @param {FuzzyFilterOptions<Item>} options - what fields to search on, and other options
  * @returns {FuzzyFilterResult<Item>[]}
+ *
+ * @example
+ *  fuzzyFilter([
+ *    {frist: 'Hello', last: 'World'},
+ *    {frist: 'Foo', last: 'Bar'},
+ *  ], {
+ *    fields: ['first', 'last'],
+ *  })
  */
 function fuzzyFilter(items, searchStr, options) {
   /** @type {FuzzyFilterResult<Item>[]} */
