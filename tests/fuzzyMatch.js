@@ -60,7 +60,7 @@ describe(`fuzzyMatch`, function() {
     assert.deepStrictEqual(fuzzyMatch(`Las Vegas`, `la"`), null);
   });
 
-  it.only(`matches initials in camelCase and TitleCase strings`, function() {
+  it(`matches initials in camelCase and TitleCase strings`, function() {
     assert.deepStrictEqual(fuzzyMatch(`FuzzBunny`, `fb`).highlights, [``, `F`, `uzz`, `B`, `unny`]);
     assert.deepStrictEqual(fuzzyMatch(`fuzzBunny.ts`, `fb`).highlights, [``, `f`, `uzz`, `B`, `unny.ts`]);
     assert.deepStrictEqual(fuzzyMatch(`fuzzBunnyIsAwesome`, `bia`).highlights, [
