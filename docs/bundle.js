@@ -575,7 +575,6 @@ function fuzzyFilter(items, searchStr, options) {
     // reverse bubble sort is O(n^2), quick sort which v8 uses is O(n(log n))
     // however if we're only sorting top X items, then bubble sort is O(Xn)
     // which is much faster than sorting the full array if X is much smaller than n
-    // if (numResultsShown && numResultsShown < results.length) {
     if (numResultsShown && numResultsShown < results.length / 5) {
       inPlaceTopNScoreSort(results, numResultsShown);
     } else {
@@ -614,7 +613,7 @@ function inPlaceTopNScoreSort(items, numTopN) {
   return items;
 }
 
-module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges, inPlaceTopNScoreSort};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};
 
 
 /***/ })
