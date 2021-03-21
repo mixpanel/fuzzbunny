@@ -600,7 +600,7 @@ function inPlaceTopNScoreSort(items, numTopN) {
     let maxIdx = n;
     let maxScore = items[maxIdx].score;
     for (let i = n + 1; i < numItems; ++i) {
-      if (items[n].score > maxScore) {
+      if (items[i].score > maxScore) {
         maxIdx = i;
         maxScore = items[maxIdx].score;
       }
@@ -611,11 +611,10 @@ function inPlaceTopNScoreSort(items, numTopN) {
     items[maxIdx] = temp;
   }
 
-  console.log(`inplace`, items.slice(0, numTopN), numTopN);
   return items;
 }
 
-module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges, inPlaceTopNScoreSort};
 
 
 /***/ })
