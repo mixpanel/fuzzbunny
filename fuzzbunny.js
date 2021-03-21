@@ -306,18 +306,35 @@ function fuzzyMatch(targetStr, searchStr) {
  */
 
 /**
+ * @template Item
+ * @typedef {Object} FuzzyFilterOptions
+ * @prop {(keyof Item)[]} fields - fields of the item object that will be searched
+ * @prop {number} [numResultsShown] - maximum number of results that will be displayed in UI.
+ *   Since sorting large arrays is expensive, only top N results are sorted by score
+ */
+
+/**
  * Searches an array of items on props and returns filtered + sorted array with scores and highlights
  * @template Item
- * @param {Item[]} items
- * @param {string} searchStr
- * @param {{fields: (keyof Item)[]}} options
+ * @param {Item[]} items - list of objects to search on
+ * @param {string} searchStr - the search string
+ * @param {FuzzyFilterOptions<Item>} options - what fields to search on, and other options
  * @returns {FuzzyFilterResult<Item>[]}
+ *
+ * @example
+ *  fuzzyFilter([
+ *    {frist: 'Hello', last: 'World'},
+ *    {frist: 'Foo', last: 'Bar'},
+ *  ], {
+ *    fields: ['first', 'last'],
+ *  })
  */
 function fuzzyFilter(items, searchStr, options) {
   /** @type {FuzzyFilterResult<Item>[]} */
-  const results = [];
-  const searchStrLowerCased = (searchStr || ``).trim().toLowerCase();
-  const fields = options ? options.fields : null;
+  let results = [];
+  const lcaseSearchStr = (searchStr || ``).trim().toLowerCase();
+  const {fields, numResultsShown} = options;
+
   if (!fields || !Array.isArray(fields) || fields.length == 0) {
     throw new Error(`invalid fields, did you forget to pass {fields: [...]} as options param?`);
   }
@@ -328,7 +345,7 @@ function fuzzyFilter(items, searchStr, options) {
     for (const field of fields) {
       const value = item[field];
       if (typeof value === `string` && value) {
-        const match = fuzzyScoreItem(value, searchStrLowerCased);
+        const match = fuzzyScoreItem(value, lcaseSearchStr);
         if (match) {
           result = result || {item, score: 0, highlights: {}};
           result.score = Math.max(match.score, result.score);
@@ -342,8 +359,8 @@ function fuzzyFilter(items, searchStr, options) {
   }
 
   // sort if searchStr is not empty, otherwise preserve original order, since its a pass through
-  if (searchStrLowerCased) {
-    results.sort((a, b) => {
+  if (lcaseSearchStr) {
+    const sortCompareFn = (/** @type {FuzzyFilterResult<Item>} */ a, /** @type {FuzzyFilterResult<Item>} */ b) => {
       // sort by score, then alphabetically by each field
       let diff = b.score - a.score;
       for (let i = 0, len = fields.length; diff === 0 && i < len; ++i) {
@@ -354,10 +371,47 @@ function fuzzyFilter(items, searchStr, options) {
         diff = (valA || ``).localeCompare(valB);
       }
       return diff;
-    });
+    };
+
+    // reverse bubble sort is O(n^2), quick sort which v8 uses is O(n(log n))
+    // however if we're only sorting top X items, then bubble sort is O(Xn)
+    // which is much faster than sorting the full array if X is much smaller than n
+    if (numResultsShown && numResultsShown < results.length / 5) {
+      inPlaceTopNScoreSort(results, numResultsShown);
+    } else {
+      results.sort(sortCompareFn);
+    }
   }
 
   return results;
+}
+
+/**
+ * Only sorts top N items in-place using bubble sort
+ * @template Item
+ * @param {Array<FuzzyFilterResult<Item>>} items - list of objects to search on
+ * @param {number} numTopN
+ * @returns {Array<FuzzyFilterResult<Item>>}
+ */
+function inPlaceTopNScoreSort(items, numTopN) {
+  const numItems = items.length;
+
+  for (let n = 0; n < numTopN; ++n) {
+    let maxIdx = n;
+    let maxScore = items[maxIdx].score;
+    for (let i = n + 1; i < numItems; ++i) {
+      if (items[i].score > maxScore) {
+        maxIdx = i;
+        maxScore = items[maxIdx].score;
+      }
+    }
+    // swap n with maxIdx
+    let temp = items[n];
+    items[n] = items[maxIdx];
+    items[maxIdx] = temp;
+  }
+
+  return items;
 }
 
 module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};

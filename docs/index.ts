@@ -47,7 +47,6 @@ async function fetchArticles(): Promise<Article[]> {
 class ArticleList {
   private elRefs: Record<string, HTMLElement>;
   private state: ArticleListState;
-  private searchFilterDebounceTimeout: number = -1;
 
   constructor(articles: Article[], elRefs: Record<string, HTMLElement>) {
     this.state = {
@@ -71,15 +70,7 @@ class ArticleList {
     this.elRefs.results.scrollTop = 0;
     const searchFilter = (ev.currentTarget as HTMLInputElement).value;
     const numItemsToShow = NUM_INITIAL_ITEMS_TO_SHOW;
-
-    // debounce searchFilter for 100ms if input length is <= 3
-    // for large set of results (>10k) the native js .sort() overheard could be >100ms
-    window.clearTimeout(this.searchFilterDebounceTimeout);
-    if (searchFilter && searchFilter.length <= 3) {
-      this.searchFilterDebounceTimeout = window.setTimeout(() => this.update({searchFilter, numItemsToShow}), 100);
-    } else {
-      this.update({searchFilter, numItemsToShow});
-    }
+    this.update({searchFilter, numItemsToShow});
   }
 
   handleResultsScroll(ev: Event) {
@@ -96,8 +87,8 @@ class ArticleList {
   }
 
   fuzzyFilterArticles(): Array<FuzzyFilterResult<Article>> {
-    const {articles, searchFilter} = this.state;
-    return fuzzyFilter(articles, searchFilter, {fields: [`name`]});
+    const {articles, searchFilter, numItemsToShow} = this.state;
+    return fuzzyFilter(articles, searchFilter, {fields: [`name`], numResultsShown: numItemsToShow});
   }
 
   render() {

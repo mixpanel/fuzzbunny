@@ -138,4 +138,26 @@ describe(`fuzzyFilter`, function() {
       },
     ]);
   });
+
+  it(`sorts only top N results with numResultsShown option`, function() {
+    const numResultsShown = 3;
+    const results = fuzzyFilter(heroes, `el`, {fields: [`name`, `ability`], numResultsShown});
+    assert.deepStrictEqual(results.slice(0, numResultsShown), [
+      {
+        item: {name: `EL Hawkins`, ability: `Phasing`},
+        score: 2200,
+        highlights: {name: [``, `EL`, ` Hawkins`]},
+      },
+      {
+        item: {name: `Elle Bishop`, ability: `Electrokinesis`},
+        score: 2200,
+        highlights: {name: [``, `El`, `le Bishop`], ability: [``, `El`, `ectrokinesis`]},
+      },
+      {
+        item: {name: `Angela Petrelli`, ability: `Enhanced dreaming`},
+        score: 1200,
+        highlights: {name: [`Ang`, `el`, `a Petrelli`]},
+      },
+    ]);
+  });
 });
