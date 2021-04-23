@@ -28,8 +28,10 @@ function _getMatchScore(idx, len, isPrefix) {
 
 // Ascii codes: <w_space>!"#$%&'()*+,-./0123456789:;<=>?@
 // ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
-const CODE_A = `a`.charCodeAt(0);
-const CODE_Z = `z`.charCodeAt(0);
+const CODE_a = `a`.charCodeAt(0);
+const CODE_z = `z`.charCodeAt(0);
+const CODE_A = `A`.charCodeAt(0);
+const CODE_Z = `Z`.charCodeAt(0);
 const CODE_0 = `0`.charCodeAt(0);
 const CODE_9 = `9`.charCodeAt(0);
 const CODE_EXCL_MARK = `!`.charCodeAt(0);
@@ -46,11 +48,19 @@ const CODE_START_UNICODE = 127;
  * @param {number} charCode
  * @returns {boolean}
  */
+function _isUpperCase(charCode) {
+  return charCode >= CODE_A && charCode <= CODE_Z;
+}
+
+/**
+ * @param {number} charCode
+ * @returns {boolean}
+ */
 function _isCodeAlphaNum(charCode) {
   // 0 - 126 charCodes are ascii, 127 onwards are unicode code points
-  // str will be lowercased so we only check for lowercased codes
   return (
-    (charCode >= CODE_A && charCode <= CODE_Z) ||
+    (charCode >= CODE_a && charCode <= CODE_z) ||
+    _isUpperCase(charCode) ||
     (charCode >= CODE_0 && charCode <= CODE_9) ||
     charCode >= CODE_START_UNICODE
   );
@@ -82,18 +92,19 @@ function _isCodePunctuation(charCode) {
 function _getTargetSkips(targetStr) {
   const targetSkips = [];
   let wasAlphaNum = false;
+  let wasUpperCase = false;
 
   for (let i = 0, len = targetStr.length; i < len; ++i) {
     const code = targetStr.charCodeAt(i);
     const isAlphaNum = _isCodeAlphaNum(code);
+    const isUpperCase = _isUpperCase(code);
 
-    if (isAlphaNum && !wasAlphaNum) {
-      targetSkips.push(i);
-    } else if (_isCodePunctuation(code)) {
+    if ((isAlphaNum && !wasAlphaNum) || (isUpperCase && !wasUpperCase) || _isCodePunctuation(code)) {
       targetSkips.push(i);
     }
 
     wasAlphaNum = isAlphaNum;
+    wasUpperCase = isUpperCase;
   }
 
   // We push the length as the last skip so when matching
@@ -198,14 +209,14 @@ function highlightsFromRanges(targetStr, ranges) {
 }
 
 /**
- * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
+ * fuzzyScoreItem is called by fuzzyMatch, it's a slightly lower level call
  * If perf is of importance and you want to avoid lowercase + trim + highlighting on every item
  * Use this and only call highlightsFromRanges for only the items that are displayed
  * @param {string} targetStr - lowercased trimmed target string to search on
  * @param {string} searchStr - lowercased trimmed search string
  * @returns {{score: number, ranges: number[]} | null} - null if no match
  */
-function fuzzyMatchSanitized(targetStr, searchStr) {
+function fuzzyScoreItem(targetStr, searchStr) {
   if (!targetStr) {
     return null;
   }
@@ -221,14 +232,15 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   // if user enters a quoted search then only perform substring match
   // e.g "la matches [{La}s Vegas] but not [Los Angeles]
   // NOTE: ending quote is optional so user can get incremental matching as they type.
-  const isQuotedSearchStr = searchStr.startsWith(`"`);
+  const isQuotedSearchStr = searchStr[0] === '"';
   if (isQuotedSearchStr) {
     searchStr = searchStr.slice(1, searchStr.endsWith(`"`) ? -1 : searchStr.length);
   }
 
   // try substring search first
   // js engine uses boyer moore algo which is very fast O(m/n)
-  const matchIdx = targetStr.indexOf(searchStr);
+  const lCaseTargetStr = targetStr.toLowerCase();
+  const matchIdx = lCaseTargetStr.indexOf(searchStr);
   const searchLen = searchStr.length;
 
   if (matchIdx >= 0) {
@@ -251,9 +263,9 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   const targetSkips = _getTargetSkips(targetStr);
 
   for (let skipIdx = 0, skipLen = targetSkips.length - 1; skipIdx < skipLen; ++skipIdx) {
-    if (targetStr[targetSkips[skipIdx]] === searchStr[0]) {
+    if (lCaseTargetStr[targetSkips[skipIdx]] === searchStr[0]) {
       // possible alignment, perform prefix match
-      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips);
+      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, lCaseTargetStr, targetSkips);
       if (ranges) {
         let score = 0;
         for (let i = 0, len = ranges.length; i < len; i += 2) {
@@ -276,8 +288,7 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
 function fuzzyMatch(targetStr, searchStr) {
   targetStr = targetStr || ``;
   searchStr = (searchStr || ``).trim().toLowerCase();
-  const targetSanitizedStr = targetStr.toLowerCase();
-  const match = fuzzyMatchSanitized(targetSanitizedStr, searchStr);
+  const match = fuzzyScoreItem(targetStr, searchStr);
 
   if (match) {
     return {
@@ -317,8 +328,7 @@ function fuzzyFilter(items, searchStr, options) {
     for (const field of fields) {
       const value = item[field];
       if (typeof value === `string` && value) {
-        const valueStrLowerCased = value.toLowerCase();
-        const match = fuzzyMatchSanitized(valueStrLowerCased, searchStrLowerCased);
+        const match = fuzzyScoreItem(value, searchStrLowerCased);
         if (match) {
           result = result || {item, score: 0, highlights: {}};
           result.score = Math.max(match.score, result.score);
@@ -350,4 +360,4 @@ function fuzzyFilter(items, searchStr, options) {
   return results;
 }
 
-module.exports = {fuzzyFilter, fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};

@@ -1,6 +1,6 @@
 const fs = require(`fs`);
 const assert = require(`assert`);
-const {fuzzyMatchSanitized} = require('../fuzzbunny');
+const {fuzzyScoreItem} = require('../fuzzbunny');
 
 const lines = fs
   .readFileSync(`${__dirname}/../docs/gutenberg-catalog.txt`, 'utf-8')
@@ -9,7 +9,7 @@ const lines = fs
   .slice(1); // ignore attribution comment on first line
 
 context(`performance`, function() {
-  describe(`fuzzyMatchSanitized`, function() {
+  describe(`fuzzyScoreItem`, function() {
     it(`matches more than 500k lines/sec`, function() {
       this.slow(1000); // 1 second slow threshold
       const linesPerSecLowBar = 500000;
@@ -17,7 +17,7 @@ context(`performance`, function() {
       const startTime = Date.now();
       for (const word of words) {
         for (const line of lines) {
-          fuzzyMatchSanitized(line.toLowerCase(), word);
+          fuzzyScoreItem(line, word);
         }
       }
       const elapsedTimeMs = Date.now() - startTime;
