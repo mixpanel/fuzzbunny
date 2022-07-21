@@ -1,210 +1,11 @@
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./docs/index.ts");
-/******/ })
-/************************************************************************/
-/******/ ({
-
-/***/ "./docs/index.ts":
-/*!***********************!*\
-  !*** ./docs/index.ts ***!
-  \***********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-// using require because typescript imports .d.ts for 'fuzzbunny' instead of module
-// this is only an issue because docs/index.ts references the module directly and not through node_modules/fuzzbunny
-const { fuzzyFilter } = __webpack_require__(/*! ../fuzzbunny */ "./fuzzbunny.js");
-const NUM_INITIAL_ITEMS_TO_SHOW = 50;
-function getArticleUrl(id) {
-    return `https://www.gutenberg.org/ebooks/${id}`;
-}
-async function fetchArticles() {
-    const storageKey = `gutenberg-catalog`;
-    const catalogUrl = `gutenberg-catalog.txt`;
-    // save in local storage for fast 2nd load
-    let catalog = localStorage.getItem(storageKey);
-    if (!catalog) {
-        catalog = await (await fetch(catalogUrl)).text();
-        localStorage.setItem(storageKey, catalog);
-    }
-    return catalog
-        .trim()
-        .split(`\n`)
-        .slice(1) // ignore comment
-        .reverse()
-        .map((line) => {
-        // parse article's name and id into object
-        const [_, name, id] = line.match(/^(.*?)\s+(\d+)$/) || [];
-        return { name, id };
-    });
-}
-class ArticleList {
-    constructor(articles, elRefs) {
-        this.searchFilterDebounceTimeout = -1;
-        this.state = {
-            articles,
-            numItemsToShow: NUM_INITIAL_ITEMS_TO_SHOW,
-            searchFilter: ``,
-        };
-        this.elRefs = elRefs;
-        this.elRefs.search.addEventListener(`input`, this.handleSearchInput.bind(this));
-        this.elRefs.results.addEventListener(`scroll`, this.handleResultsScroll.bind(this));
-        this.update({});
-    }
-    // Simple update -> render lifecycle;
-    update(props = {}) {
-        Object.assign(this.state, props);
-        this.render();
-    }
-    handleSearchInput(ev) {
-        this.elRefs.results.scrollTop = 0;
-        const searchFilter = ev.currentTarget.value;
-        const numItemsToShow = NUM_INITIAL_ITEMS_TO_SHOW;
-        // debounce searchFilter for 100ms if input length is <= 3
-        // for large set of results (>10k) the native js .sort() overheard could be >100ms
-        window.clearTimeout(this.searchFilterDebounceTimeout);
-        if (searchFilter && searchFilter.length <= 3) {
-            this.searchFilterDebounceTimeout = window.setTimeout(() => this.update({ searchFilter, numItemsToShow }), 100);
-        }
-        else {
-            this.update({ searchFilter, numItemsToShow });
-        }
-    }
-    handleResultsScroll(ev) {
-        const { articles, numItemsToShow } = this.state;
-        const resultsEl = this.elRefs.results;
-        const distanceToBottom = resultsEl.scrollHeight - resultsEl.clientHeight - resultsEl.scrollTop;
-        const distanceThreshold = 100;
-        if (distanceToBottom < distanceThreshold) {
-            this.update({
-                numItemsToShow: Math.min(numItemsToShow + NUM_INITIAL_ITEMS_TO_SHOW, articles.length),
-            });
-        }
-    }
-    fuzzyFilterArticles() {
-        const { articles, searchFilter } = this.state;
-        return fuzzyFilter(articles, searchFilter, { fields: [`name`] });
-    }
-    render() {
-        const { numItemsToShow } = this.state;
-        const startTime = Date.now();
-        const filteredArticles = this.fuzzyFilterArticles();
-        const elapsedMs = Date.now() - startTime;
-        this.elRefs.results.innerHTML = filteredArticles
-            .slice(0, numItemsToShow)
-            .map((match) => 
-        // @ts-ignore - object possibly undefined (we're sure they're non-null)
-        `<a href='${getArticleUrl(match.item.id)}' target='_blank'>${match.highlights.name
-            .map((part) => `<span>${part}</span>`)
-            .join(``)}</a>`)
-            .join(``);
-        this.elRefs.stats.innerHTML = `Found ${filteredArticles.length.toLocaleString()} results in ${elapsedMs}ms`;
-    }
-}
-document.addEventListener(`DOMContentLoaded`, function () {
-    fetchArticles().then((articles) => {
-        new ArticleList(articles, {
-            search: document.querySelector(`.search`),
-            results: document.querySelector(`.results`),
-            stats: document.querySelector(`.stats`),
-        });
-    });
-});
-
-
-/***/ }),
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
 
 /***/ "./fuzzbunny.js":
 /*!**********************!*\
   !*** ./fuzzbunny.js ***!
   \**********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/***/ ((module) => {
 
 const SCORE_START_STR = 1000;
 const SCORE_PREFIX = 200;
@@ -236,8 +37,10 @@ function _getMatchScore(idx, len, isPrefix) {
 
 // Ascii codes: <w_space>!"#$%&'()*+,-./0123456789:;<=>?@
 // ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
-const CODE_A = `a`.charCodeAt(0);
-const CODE_Z = `z`.charCodeAt(0);
+const CODE_a = `a`.charCodeAt(0);
+const CODE_z = `z`.charCodeAt(0);
+const CODE_A = `A`.charCodeAt(0);
+const CODE_Z = `Z`.charCodeAt(0);
 const CODE_0 = `0`.charCodeAt(0);
 const CODE_9 = `9`.charCodeAt(0);
 const CODE_EXCL_MARK = `!`.charCodeAt(0);
@@ -254,11 +57,19 @@ const CODE_START_UNICODE = 127;
  * @param {number} charCode
  * @returns {boolean}
  */
+function _isUpperCase(charCode) {
+  return charCode >= CODE_A && charCode <= CODE_Z;
+}
+
+/**
+ * @param {number} charCode
+ * @returns {boolean}
+ */
 function _isCodeAlphaNum(charCode) {
   // 0 - 126 charCodes are ascii, 127 onwards are unicode code points
-  // str will be lowercased so we only check for lowercased codes
   return (
-    (charCode >= CODE_A && charCode <= CODE_Z) ||
+    (charCode >= CODE_a && charCode <= CODE_z) ||
+    _isUpperCase(charCode) ||
     (charCode >= CODE_0 && charCode <= CODE_9) ||
     charCode >= CODE_START_UNICODE
   );
@@ -290,18 +101,19 @@ function _isCodePunctuation(charCode) {
 function _getTargetSkips(targetStr) {
   const targetSkips = [];
   let wasAlphaNum = false;
+  let wasUpperCase = false;
 
   for (let i = 0, len = targetStr.length; i < len; ++i) {
     const code = targetStr.charCodeAt(i);
     const isAlphaNum = _isCodeAlphaNum(code);
+    const isUpperCase = _isUpperCase(code);
 
-    if (isAlphaNum && !wasAlphaNum) {
-      targetSkips.push(i);
-    } else if (_isCodePunctuation(code)) {
+    if ((isAlphaNum && !wasAlphaNum) || (isUpperCase && !wasUpperCase) || _isCodePunctuation(code)) {
       targetSkips.push(i);
     }
 
     wasAlphaNum = isAlphaNum;
+    wasUpperCase = isUpperCase;
   }
 
   // We push the length as the last skip so when matching
@@ -406,14 +218,14 @@ function highlightsFromRanges(targetStr, ranges) {
 }
 
 /**
- * fuzzyMatchSanitized is called by fuzzyMatch, it's a slightly lower level call
+ * fuzzyScoreItem is called by fuzzyMatch, it's a slightly lower level call
  * If perf is of importance and you want to avoid lowercase + trim + highlighting on every item
  * Use this and only call highlightsFromRanges for only the items that are displayed
  * @param {string} targetStr - lowercased trimmed target string to search on
  * @param {string} searchStr - lowercased trimmed search string
  * @returns {{score: number, ranges: number[]} | null} - null if no match
  */
-function fuzzyMatchSanitized(targetStr, searchStr) {
+function fuzzyScoreItem(targetStr, searchStr) {
   if (!targetStr) {
     return null;
   }
@@ -429,14 +241,15 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   // if user enters a quoted search then only perform substring match
   // e.g "la matches [{La}s Vegas] but not [Los Angeles]
   // NOTE: ending quote is optional so user can get incremental matching as they type.
-  const isQuotedSearchStr = searchStr.startsWith(`"`);
+  const isQuotedSearchStr = searchStr[0] === '"';
   if (isQuotedSearchStr) {
     searchStr = searchStr.slice(1, searchStr.endsWith(`"`) ? -1 : searchStr.length);
   }
 
   // try substring search first
   // js engine uses boyer moore algo which is very fast O(m/n)
-  const matchIdx = targetStr.indexOf(searchStr);
+  const lCaseTargetStr = targetStr.toLowerCase();
+  const matchIdx = lCaseTargetStr.indexOf(searchStr);
   const searchLen = searchStr.length;
 
   if (matchIdx >= 0) {
@@ -459,9 +272,9 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
   const targetSkips = _getTargetSkips(targetStr);
 
   for (let skipIdx = 0, skipLen = targetSkips.length - 1; skipIdx < skipLen; ++skipIdx) {
-    if (targetStr[targetSkips[skipIdx]] === searchStr[0]) {
+    if (lCaseTargetStr[targetSkips[skipIdx]] === searchStr[0]) {
       // possible alignment, perform prefix match
-      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, targetStr, targetSkips);
+      const ranges = _fuzzyPrefixMatch(skipIdx, searchStr, lCaseTargetStr, targetSkips);
       if (ranges) {
         let score = 0;
         for (let i = 0, len = ranges.length; i < len; i += 2) {
@@ -484,8 +297,7 @@ function fuzzyMatchSanitized(targetStr, searchStr) {
 function fuzzyMatch(targetStr, searchStr) {
   targetStr = targetStr || ``;
   searchStr = (searchStr || ``).trim().toLowerCase();
-  const targetSanitizedStr = targetStr.toLowerCase();
-  const match = fuzzyMatchSanitized(targetSanitizedStr, searchStr);
+  const match = fuzzyScoreItem(targetStr, searchStr);
 
   if (match) {
     return {
@@ -525,8 +337,7 @@ function fuzzyFilter(items, searchStr, options) {
     for (const field of fields) {
       const value = item[field];
       if (typeof value === `string` && value) {
-        const valueStrLowerCased = value.toLowerCase();
-        const match = fuzzyMatchSanitized(valueStrLowerCased, searchStrLowerCased);
+        const match = fuzzyScoreItem(value, searchStrLowerCased);
         if (match) {
           result = result || {item, score: 0, highlights: {}};
           result.score = Math.max(match.score, result.score);
@@ -558,10 +369,150 @@ function fuzzyFilter(items, searchStr, options) {
   return results;
 }
 
-module.exports = {fuzzyFilter, fuzzyMatch, fuzzyMatchSanitized, highlightsFromRanges};
+module.exports = {fuzzyFilter, fuzzyMatch, fuzzyScoreItem, highlightsFromRanges};
 
 
 /***/ })
 
-/******/ });
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+/*!***********************!*\
+  !*** ./docs/index.ts ***!
+  \***********************/
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+// using require because typescript imports .d.ts for 'fuzzbunny' instead of module
+// this is only an issue because docs/index.ts references the module directly and not through node_modules/fuzzbunny
+const { fuzzyFilter } = __webpack_require__(/*! ../fuzzbunny */ "./fuzzbunny.js");
+const NUM_INITIAL_ITEMS_TO_SHOW = 50;
+function getArticleUrl(id) {
+    return `https://www.gutenberg.org/ebooks/${id}`;
+}
+async function fetchArticles() {
+    const storageKey = `gutenberg-catalog`;
+    const catalogUrl = `gutenberg-catalog.txt`;
+    // save in local storage for fast 2nd load
+    let catalog = localStorage.getItem(storageKey);
+    if (!catalog) {
+        catalog = await (await fetch(catalogUrl)).text();
+        localStorage.setItem(storageKey, catalog);
+    }
+    return catalog
+        .trim()
+        .split(`\n`)
+        .slice(1) // ignore comment
+        .reverse()
+        .map((line) => {
+        // parse article's name and id into object
+        const [_, name, id] = line.match(/^(.*?)\s+(\d+)$/) || [];
+        return { name, id };
+    });
+}
+class ArticleList {
+    constructor(articles, elRefs) {
+        this.searchFilterDebounceTimeout = -1;
+        this.state = {
+            articles,
+            numItemsToShow: NUM_INITIAL_ITEMS_TO_SHOW,
+            searchFilter: ``,
+        };
+        this.elRefs = elRefs;
+        this.elRefs.search.addEventListener(`input`, this.handleSearchInput.bind(this));
+        this.elRefs.results.addEventListener(`scroll`, this.handleResultsScroll.bind(this));
+        this.update({});
+    }
+    // Simple update -> render lifecycle;
+    update(props = {}) {
+        Object.assign(this.state, props);
+        this.render();
+    }
+    handleSearchInput(ev) {
+        this.elRefs.results.scrollTop = 0;
+        const searchFilter = ev.currentTarget.value;
+        const numItemsToShow = NUM_INITIAL_ITEMS_TO_SHOW;
+        // debounce searchFilter for 100ms if input length is <= 3
+        // for large set of results (>10k) the native js .sort() overheard could be >100ms
+        window.clearTimeout(this.searchFilterDebounceTimeout);
+        if (searchFilter && searchFilter.length <= 3) {
+            this.searchFilterDebounceTimeout = window.setTimeout(() => this.update({ searchFilter, numItemsToShow }), 100);
+        }
+        else {
+            this.update({ searchFilter, numItemsToShow });
+        }
+    }
+    handleResultsScroll(ev) {
+        const { articles, numItemsToShow } = this.state;
+        const resultsEl = this.elRefs.results;
+        const distanceToBottom = resultsEl.scrollHeight - resultsEl.clientHeight - resultsEl.scrollTop;
+        const distanceThreshold = 100;
+        if (distanceToBottom < distanceThreshold) {
+            this.update({
+                numItemsToShow: Math.min(numItemsToShow + NUM_INITIAL_ITEMS_TO_SHOW, articles.length),
+            });
+        }
+    }
+    fuzzyFilterArticles() {
+        const { articles, searchFilter } = this.state;
+        return fuzzyFilter(articles, searchFilter, { fields: [`name`] });
+    }
+    render() {
+        const { numItemsToShow } = this.state;
+        const startTime = Date.now();
+        const filteredArticles = this.fuzzyFilterArticles();
+        const elapsedMs = Date.now() - startTime;
+        this.elRefs.results.innerHTML = filteredArticles
+            .slice(0, numItemsToShow)
+            .map((match) => 
+        // @ts-ignore - object possibly undefined (we're sure they're non-null)
+        `<a href='${getArticleUrl(match.item.id)}' target='_blank'>${match.highlights.name
+            .map((part) => `<span>${part}</span>`)
+            .join(``)}</a>`)
+            .join(``);
+        this.elRefs.stats.innerHTML = `Found ${filteredArticles.length.toLocaleString()} results in ${elapsedMs}ms`;
+    }
+}
+document.addEventListener(`DOMContentLoaded`, function () {
+    fetchArticles().then((articles) => {
+        new ArticleList(articles, {
+            search: document.querySelector(`.search`),
+            results: document.querySelector(`.results`),
+            stats: document.querySelector(`.stats`),
+        });
+    });
+});
+
+})();
+
+/******/ })()
+;
 //# sourceMappingURL=bundle.js.map
