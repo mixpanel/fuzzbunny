@@ -1,5 +1,5 @@
 module.exports = {
-  devtool: `sourcemap`,
+  devtool: `source-map`,
   entry: `${__dirname}/index.ts`,
   mode: process.NODE_ENV || `development`,
   module: {
